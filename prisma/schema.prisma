@@ -13,12 +13,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Cheese {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  origin      String?  @db.VarChar(191)
-  description String?  @db.Text
-  agingDays   Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model TripGroup {
+  trip_group_id String   @id @default(uuid()) @db.Char(36)
+  name          String
+  status        String
+  created_at    DateTime @default(now())
+
+  @@map("trip_groups")
 }

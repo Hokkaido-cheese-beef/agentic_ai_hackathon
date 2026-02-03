@@ -3,11 +3,16 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+# Prisma CLI runs during postinstall, so the schema/config must exist beforehand
+COPY prisma ./prisma
+COPY prisma.config.ts ./prisma.config.ts
+ENV DATABASE_URL=mysql://root:root_password@db:3306/app_db
 RUN npm ci
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
@@ -27,6 +32,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/prisma.config.ts ./prisma.config.ts
 
 USER nextjs
 EXPOSE 3000

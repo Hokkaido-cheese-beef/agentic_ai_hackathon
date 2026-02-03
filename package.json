@@ -6,9 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "prisma generate",
+    "db:seed": "node prisma/seed.mjs",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose stop db",
+    "db:destroy": "docker compose rm -sf db"
+  },
+  "prisma": {
+    "seed": "npm run db:seed"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.2",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -19,8 +28,10 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "dotenv": "^17.2.3",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prisma": "^6.19.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

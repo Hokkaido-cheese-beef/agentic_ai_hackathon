@@ -36,7 +36,9 @@ src/
 
 ## 🛠️ セットアップ
 
-ローカルでクリーンな状態から MySQL を起動し、シード投入～Next.js を立ち上げるまでの一連の手順です。
+### 💻 Next.js はホスト実行 / DB はコンテナ
+
+ローカルマシン上で Next.js を動かし、MySQL だけ Docker コンテナで起動するパターンです。最も手軽に開発を進められる想定の手順になります。
 
 ```bash
 # 1. リポジトリをクローン
@@ -62,6 +64,20 @@ npm run db:seed
 npm run dev
 ```
 
+
+### 🐳 docker compose でまとめて実行
+
+Next.js アプリも MySQL もすべてコンテナで動かしたい場合はこちらを利用します。ホスト側では `docker compose` のみを操作すればよい構成です。
+
+```bash
+docker compose up --build        # フォアグラウンド起動
+docker compose up -d --build     # バックグラウンド起動
+docker compose down -v           # 停止＆ボリューム削除
+```
+
+`app` サービスは `DATABASE_URL=mysql://root:root_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。
+
+
 [http://localhost:3000](http://localhost:3000) でアプリケーションにアクセスできます。
 
 ## 📝 利用可能なスクリプト
@@ -80,15 +96,3 @@ npm run lint     # ESLintチェック
 3. **マイグレーションを確認・コミット**: 生成された `prisma/migrations/<timestamp>_<migration-name>/migration.sql` をレビューして Git にコミット。
 4. **Prisma Client の再生成**: 型を即座に更新したい場合は `npx prisma generate` を実行（`npm install` 後は `postinstall` で自動生成）。
 5. **動作確認**: `npm run dev` を起動し、該当の画面/API で挙動を確認。必要に応じて `npm run db:seed` でテストデータを再投入。
-
-## 🐳  コンテナ実行
-
-Next.js アプリと MySQL をまとめて動かす場合は `docker compose` を利用します。
-
-```bash
-docker compose up --build        # フォアグラウンド起動
-docker compose up -d --build     # バックグラウンド起動
-docker compose down -v           # 停止＆ボリューム削除
-```
-
-`app` サービスは `DATABASE_URL=mysql://root:root_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。

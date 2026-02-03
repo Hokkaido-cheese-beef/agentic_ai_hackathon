@@ -64,28 +64,6 @@ npm run dev
 
 [http://localhost:3000](http://localhost:3000) でアプリケーションにアクセスできます。
 
-## 🗃️ データベース (MySQL + Prisma)
-
-- `.env` の `DATABASE_URL` / `MYSQL_*` を環境に合わせて調整
-- MySQL コンテナの操作: `npm run db:up` / `db:down` / `db:destroy`
-- マイグレーション: `npx prisma migrate dev --name init`
-- シード投入: `npm run db:seed`
-- Prisma Client は `src/lib/prisma.ts` で初期化、`/api/hello` が利用例
-
-> NOTE: 開発環境では root アカウントで MySQL に接続するため、Prisma が shadow DB を自動で作成・削除します。一般ユーザーで接続したい場合は、`CREATE/DROP DATABASE` 権限を付与しつつ `SHADOW_DATABASE_URL` を別途設定してください。
-
-## 🐳 Docker / コンテナ実行
-
-Next.js アプリと MySQL をまとめて動かす場合は `docker compose` を利用します。
-
-```bash
-docker compose up --build        # 前面起動
-docker compose up -d --build     # バックグラウンド起動
-docker compose down -v           # 停止＆ボリューム削除
-```
-
-`app` サービスは `DATABASE_URL=mysql://root:root_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。
-
 ## 📝 利用可能なスクリプト
 
 ```bash
@@ -95,13 +73,22 @@ npm run start    # プロダクションサーバー起動
 npm run lint     # ESLintチェック
 ```
 
-## 🔌 API エンドポイント
+## DB スキーマ変更時のローカル適用と確認フロー
 
-- `GET /api/hello` - サンプルAPIエンドポイント
-- `POST /api/hello` - データ送信のサンプル
+1. **スキーマを編集**: `prisma/schema.prisma` に変更を加える。
+2. **マイグレーション生成・適用**: MySQL を起動した状態で `npx prisma migrate dev --name <migration-name>` を実行し、ローカル DB とマイグレーションファイルを更新。
+3. **マイグレーションを確認・コミット**: 生成された `prisma/migrations/<timestamp>_<migration-name>/migration.sql` をレビューして Git にコミット。
+4. **Prisma Client の再生成**: 型を即座に更新したい場合は `npx prisma generate` を実行（`npm install` 後は `postinstall` で自動生成）。
+5. **動作確認**: `npm run dev` を起動し、該当の画面/API で挙動を確認。必要に応じて `npm run db:seed` でテストデータを再投入。
 
-## 📚 参考リンク
+## 🐳  コンテナ実行
 
-- [Next.js Documentation](https://nextjs.org/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [TypeScript Documentation](https://www.typescriptlang.org/docs/)
+Next.js アプリと MySQL をまとめて動かす場合は `docker compose` を利用します。
+
+```bash
+docker compose up --build        # フォアグラウンド起動
+docker compose up -d --build     # バックグラウンド起動
+docker compose down -v           # 停止＆ボリューム削除
+```
+
+`app` サービスは `DATABASE_URL=mysql://root:root_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。

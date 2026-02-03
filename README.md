@@ -66,13 +66,13 @@ npm run dev
 
 ## 🗃️ データベース (MySQL + Prisma)
 
-- `.env` の `DATABASE_URL` / `SHADOW_DATABASE_URL` / `MYSQL_*` を環境に合わせて調整
+- `.env` の `DATABASE_URL` / `MYSQL_*` を環境に合わせて調整
 - MySQL コンテナの操作: `npm run db:up` / `db:down` / `db:destroy`
 - マイグレーション: `npx prisma migrate dev --name init`
 - シード投入: `npm run db:seed`
 - Prisma Client は `src/lib/prisma.ts` で初期化、`/api/hello` が利用例
 
-> NOTE: 初回 `npm run db:up` で `docker/mysql/init/01-init.sql` が `app_db` / `app_db_shadow` と `app_user` を自動作成します。既存ボリュームを再利用してシャドウDBが無い場合は `docker compose down -v` で削除するか、手動で `CREATE DATABASE app_db_shadow` を実行してください。
+> NOTE: 開発環境では root アカウントで MySQL に接続するため、Prisma が shadow DB を自動で作成・削除します。一般ユーザーで接続したい場合は、`CREATE/DROP DATABASE` 権限を付与しつつ `SHADOW_DATABASE_URL` を別途設定してください。
 
 ## 🐳 Docker / コンテナ実行
 
@@ -84,7 +84,7 @@ docker compose up -d --build     # バックグラウンド起動
 docker compose down -v           # 停止＆ボリューム削除
 ```
 
-`app` サービスは `DATABASE_URL=mysql://app_user:app_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。
+`app` サービスは `DATABASE_URL=mysql://root:root_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。
 
 ## 📝 利用可能なスクリプト
 

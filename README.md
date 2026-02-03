@@ -4,7 +4,7 @@
 
 ## 🚀 技術スタック
 
-- **Frontend**: Next.js 15 (App Router), React 19, TypeScript
+- **Frontend**: Next.js 16 (App Router), React 19, TypeScript
 - **Styling**: Tailwind CSS
 - **Backend**: Next.js API Routes
 - **Linting**: ESLint
@@ -36,14 +36,29 @@ src/
 
 ## 🛠️ セットアップ
 
+ローカルでクリーンな状態から MySQL を起動し、シード投入～Next.js を立ち上げるまでの一連の手順です。
+
 ```bash
-# 依存関係のインストール
+# 1. リポジトリをクローン
+git clone https://github.com/Hokkaido-cheese-beef/agentic_ai_hackathon.git
+cd agentic_ai_hackathon
+
+# 2. 依存関係をインストール
 npm install
 
-# 環境変数の設定
-cp .env.local.example .env.local
+# 3. 環境変数ファイルを作成
+cp .env.sample .env
 
-# 開発サーバーの起動
+# 4. MySQL コンテナを起動
+npm run db:up
+
+# 5. Prisma マイグレーションを適用（最新スキーマを DB に反映）
+npx prisma migrate dev --name init
+
+# 6. サンプルデータを投入
+npm run db:seed
+
+# 7. Next.js 開発サーバーを起動
 npm run dev
 ```
 
@@ -51,42 +66,25 @@ npm run dev
 
 ## 🗃️ データベース (MySQL + Prisma)
 
-1. `.env.local` の `DATABASE_URL` と `MYSQL_*` を任意の値に変更します。
-2. ローカルで MySQL を起動する場合は、用意した npm スクリプトで Docker の DB コンテナを起動します。
+- `.env` の `DATABASE_URL` / `SHADOW_DATABASE_URL` / `MYSQL_*` を環境に合わせて調整
+- MySQL コンテナの操作: `npm run db:up` / `db:down` / `db:destroy`
+- マイグレーション: `npx prisma migrate dev --name init`
+- シード投入: `npm run db:seed`
+- Prisma Client は `src/lib/prisma.ts` で初期化、`/api/hello` が利用例
 
-```bash
-# MySQL だけを起動
-npm run db:up
-
-# 停止 / 完全削除
-npm run db:down
-npm run db:destroy
-
-# Prisma のスキーマを DB に適用
-npx prisma migrate dev --name init
-
-# (任意) サンプルデータ投入
-npx prisma db seed
-```
-
-Prisma Client は `src/lib/prisma.ts` で初期化されており、`import { prisma } from "@/lib/prisma";` でどこからでも利用できます。`/api/hello` では `Cheese` テーブルの読み書き例を実装しています。
+> NOTE: 初回 `npm run db:up` で `docker/mysql/init/01-init.sql` が `app_db` / `app_db_shadow` と `app_user` を自動作成します。既存ボリュームを再利用してシャドウDBが無い場合は `docker compose down -v` で削除するか、手動で `CREATE DATABASE app_db_shadow` を実行してください。
 
 ## 🐳 Docker / コンテナ実行
 
-Next.js アプリと MySQL を 1 コマンドで立ち上げる `docker-compose.yml` とビルド用 `Dockerfile` を追加しています。
+Next.js アプリと MySQL をまとめて動かす場合は `docker compose` を利用します。
 
 ```bash
-# コンテナのビルドと起動
-docker compose up --build
-
-# バックグラウンドで起動したい場合
-docker compose up -d --build
-
-# 停止と後片付け
-docker compose down -v
+docker compose up --build        # 前面起動
+docker compose up -d --build     # バックグラウンド起動
+docker compose down -v           # 停止＆ボリューム削除
 ```
 
-`app` サービスは `DATABASE_URL=mysql://app_user:app_password@db:3306/app_db` を参照し、`db` サービスの MySQL を利用します。開発環境からホストの MySQL に接続する場合は `.env.local` の `localhost:3307` を利用してください。`npm run db:up` スクリプトもこのコンテナを使います。
+`app` サービスは `DATABASE_URL=mysql://app_user:app_password@db:3306/app_db` で `db` サービスに接続します。ホストから直接 MySQL に触りたいときは `.env` 設定どおり `localhost:3307` を利用します。
 
 ## 📝 利用可能なスクリプト
 

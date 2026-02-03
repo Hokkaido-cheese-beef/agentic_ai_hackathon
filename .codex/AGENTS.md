@@ -32,12 +32,6 @@ src/
 └─ types/index.ts         # 共通レスポンス/ユーザー型
 ```
 
-## 仕様で重要なポイント
-1. フロー: LP → メンバー招待 → 興味・関心設定 → AI提案 → 候補追加 → 候補比較 → 投票 → 投票結果。
-2. UIルール: 64pxヘッダー、白カード+ソフトシャドウ、52px CTA、IBM Plex Sans / Outfit系タイポ、Lucide系アイコン。
-3. データ要素: 候補カード=タイトル/説明/予算/距離/雰囲気/星評価。投票カード=候補メタ＋投票数。結果画面=勝者カード＋ランキング、右カラムDetailはTODO。
-4. 未決事項: DetailCardの内容、候補削除時のUX、実際のAI/APIレスポンス仕様はサンプル準拠で今後定義。
-
 ## 実装メモ
 - `tsconfig` は `moduleResolution: "bundler"`、パスエイリアス `@/*` → `src/*`。
 - Tailwindトークン/背景は `globals.css` で `--font-plex-sans` を使用。

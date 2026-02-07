@@ -165,7 +165,6 @@ npm install
 DATABASE_URL="mysql://root:root_password@localhost:3307/app_db"
 GOOGLE_GENERATIVE_AI_API_KEY="your-gemini-api-key"
 NEXT_PUBLIC_FIREBASE_API_KEY="..."
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN="..."
 NEXT_PUBLIC_FIREBASE_PROJECT_ID="..."
 FIREBASE_SERVICE_ACCOUNT_KEY='{"type":"service_account",...}'
 

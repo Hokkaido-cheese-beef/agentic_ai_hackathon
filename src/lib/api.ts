@@ -4,6 +4,15 @@
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
 
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 interface FetchOptions extends RequestInit {
   params?: Record<string, string>;
 }
@@ -33,7 +42,14 @@ export async function fetcher<T>(
   });
 
   if (!response.ok) {
-    throw new Error(`API error: ${response.status} ${response.statusText}`);
+    let errorMessage = `API error: ${response.status}`;
+    try {
+      const data = await response.json();
+      if (data?.error) errorMessage = data.error;
+    } catch {
+      // JSONパース失敗時はデフォルトメッセージを使用
+    }
+    throw new ApiError(errorMessage, response.status);
   }
 
   return response.json();

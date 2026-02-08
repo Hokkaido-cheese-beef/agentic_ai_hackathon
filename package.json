@@ -19,7 +19,7 @@
     "seed": "npm run db:seed"
   },
   "dependencies": {
-    "@ai-sdk/google": "^3.0.21",
+    "@ai-sdk/google-vertex": "^4.0.45",
     "@ai-sdk/react": "^3.0.75",
     "@ibm/plex": "^6.4.1",
     "@prisma/client": "^6.19.2",

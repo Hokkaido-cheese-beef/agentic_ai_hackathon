@@ -5,9 +5,14 @@
  */
 import type { IAiService, AiSummaryResult, AiStreamResult } from "./interfaces";
 import { generateText, streamText } from "ai";
-import { google } from "@ai-sdk/google";
+import { createVertex } from "@ai-sdk/google-vertex";
 import { aiSummaryResponseSchema } from "@/lib/validators";
 import { sanitizeForPrompt } from "@/lib/sanitize";
+
+const vertex = createVertex({
+  project: process.env.GOOGLE_CLOUD_PROJECT,
+  location: process.env.GOOGLE_CLOUD_LOCATION,
+});
 
 // --- Gemini (本番) ---
 
@@ -49,7 +54,7 @@ tags は3つ、qa は2-3問で作成してください。`;
     let result;
     try {
       result = await generateText({
-        model: google("gemini-2.0-flash"),
+        model: vertex("gemini-2.0-flash"),
         system: systemPrompt,
         prompt: userPrompt,
         abortSignal: controller.signal,
@@ -99,7 +104,7 @@ tags は3つ、qa は2-3問で作成してください。`;
     });
 
     const result = streamText({
-      model: google("gemini-2.0-flash"),
+      model: vertex("gemini-2.0-flash"),
       system: systemPrompt,
       prompt: userPrompt,
       onFinish: ({ text }) => {

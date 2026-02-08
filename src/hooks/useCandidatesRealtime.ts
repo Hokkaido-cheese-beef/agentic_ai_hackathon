@@ -1,0 +1,36 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { collection, onSnapshot } from "firebase/firestore";
+import { getDb } from "@/lib/firebase";
+import type { TripCandidate } from "@/types";
+
+export function useCandidatesRealtime(tripGroupId: string) {
+  const [candidates, setCandidates] = useState<TripCandidate[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(getDb(), "tripGroups", tripGroupId, "candidates"),
+      (snapshot) => {
+        const data = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          trip_group_id: tripGroupId,
+          created_at: "",
+          ...doc.data(),
+          tags: doc.data().tags || [],
+          ai_summary: doc.data().ai_summary || null,
+        })) as TripCandidate[];
+        setCandidates(data);
+        setIsLoading(false);
+      },
+      () => {
+        setIsLoading(false);
+      }
+    );
+
+    return () => unsub();
+  }, [tripGroupId]);
+
+  return { candidates, isLoading };
+}

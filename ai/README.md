@@ -56,6 +56,38 @@ curl -X POST http://localhost:8080/plan \
   }'
 ```
 
+## Docker で実行
+
+### ビルド
+
+```bash
+cd ai
+docker build -t ai-server .
+```
+
+### 起動
+
+Vertex AI を使用する場合は ADC の認証情報をコンテナにマウントします。
+
+```bash
+docker run --rm -p 8080:8080 \
+  -e GOOGLE_GENAI_USE_VERTEXAI=True \
+  -e GOOGLE_CLOUD_PROJECT=<your-project-id> \
+  -e GOOGLE_CLOUD_LOCATION=global \
+  -v $HOME/.config/gcloud/application_default_credentials.json:/home/nonroot/.config/gcloud/application_default_credentials.json:ro \
+  ai-server
+```
+
+Gemini API キーを使用する場合は以下のように起動します。
+
+```bash
+docker run --rm -p 8080:8080 \
+  -e GOOGLE_API_KEY=<your-api-key> \
+  ai-server
+```
+
+サーバーが起動したら `http://localhost:8080/plan` にリクエストできます。
+
 ## デプロイ (Cloud Run)
 
 ### 前提条件

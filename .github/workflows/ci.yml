@@ -76,8 +76,10 @@ jobs:
   build-and-push:
     needs: build-and-test
     if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      (github.event_name == 'workflow_dispatch' && (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped'))
+      always() && (
+        (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+        (github.event_name == 'workflow_dispatch' && (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped'))
+      )
     runs-on: ubuntu-latest
     permissions:
       contents: read

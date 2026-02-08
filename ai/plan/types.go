@@ -24,4 +24,6 @@ type TravelPlan struct {
 	Tag         TravelTag    `json:"tag"`
 	Description string       `json:"description"`
 	Survey      []SurveyItem `json:"survey"`
+	Image       string       `json:"image"`
 }
+

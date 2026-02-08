@@ -35,10 +35,10 @@ func TestBuildPlanPrompt(t *testing.T) {
 			wantContain: []string{"東京", "大阪"},
 		},
 		{
-			name:        "正常: JSON スキーマの指示が含まれる",
+			name:        "正常: JSON スキーマの指示が含まれる（質問あり）",
 			origin:      "札幌",
 			destination: "函館",
-			questions:   []string{},
+			questions:   []string{"おすすめは？"},
 			wantContain: []string{"budget_jpy", "travel_time", "survey"},
 		},
 	}

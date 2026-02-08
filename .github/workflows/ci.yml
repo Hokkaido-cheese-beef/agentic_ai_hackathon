@@ -10,10 +10,16 @@ on:
       commit_sha:
         description: "Commit SHA to build"
         required: true
+      skip_build_and_test:
+        description: "Skip build-and-test job"
+        type: boolean
+        required: false
+        default: false
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.skip_build_and_test != true }}
 
     services:
       mysql:
@@ -70,7 +76,7 @@ jobs:
     needs: build-and-test
     if: |
       (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
-      github.event_name == 'workflow_dispatch'
+      (github.event_name == 'workflow_dispatch' && (needs.build-and-test.result == 'success' || needs.build-and-test.result == 'skipped'))
     runs-on: ubuntu-latest
     permissions:
       contents: read

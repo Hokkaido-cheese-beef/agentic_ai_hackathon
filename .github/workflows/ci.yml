@@ -43,11 +43,12 @@ jobs:
       NEXT_PUBLIC_FIREBASE_PROJECT_ID: dummy-project
       GOOGLE_CLOUD_PROJECT: dummy-project
       GOOGLE_GENERATIVE_AI_API_KEY: dummy
+      COMMIT_SHA: ${{ github.event.inputs.commit_sha || github.sha }}
 
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.commit_sha || github.sha }}
+          ref: ${{ env.COMMIT_SHA }}
 
       - uses: actions/setup-node@v4
         with:
@@ -81,10 +82,12 @@ jobs:
     permissions:
       contents: read
       id-token: write
+    env:
+      COMMIT_SHA: ${{ github.event.inputs.commit_sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.commit_sha || github.sha }}
+          ref: ${{ env.COMMIT_SHA }}
 
       - name: Auth to Google Cloud (Workload Identity Federation)
         uses: google-github-actions/auth@v2
@@ -109,7 +112,7 @@ jobs:
         with:
           images: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/${{ secrets.GAR_IMAGE }}
           tags: |
-            type=sha,format=long
+            type=raw,value=sha-${{ env.COMMIT_SHA }}
             type=raw,value=latest
 
       - name: Build and push

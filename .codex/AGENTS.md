@@ -51,6 +51,12 @@ prisma/
 └─ seed.mjs
 ```
 
+## ドキュメント
+- 技術ドキュメント（分割）:
+- `doc/stack.md` / `doc/structure.md` / `doc/data-model.md` / `doc/flows.md`
+- `doc/tests.md` / `doc/design-tokens.md` / `doc/notes.md`
+- README: `README.md`
+
 ## 実装メモ / 重要注意点
 - `.env.sample` を基に `.env` を作成する。
 - デモモード: `NEXT_PUBLIC_DEMO_MODE=true` で外部依存なし (Prisma/Firestore/AI がモックに切替)。

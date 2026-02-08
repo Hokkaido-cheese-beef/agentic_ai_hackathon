@@ -12,24 +12,22 @@ func BuildPlanPrompt(origin, destination string, questions []string) string {
 		questionsBuilder.WriteString(fmt.Sprintf("- %s\n", q))
 	}
 
-	return fmt.Sprintf(`あなたは熟練の旅行サポーターです。
-出発地「%s」から目的地「%s」への旅行プランを提案してください。
+	hasQuestions := questionsBuilder.String() != ""
 
+	var surveySection string
+	if hasQuestions {
+		surveySection = fmt.Sprintf(`
 【重要：調査リクエスト】
 以下の質問リストの**すべて**に対して、1つずつ調査を行い回答してください。
 回答漏れがないようにしてください。
 
 質問リスト：
-%s
-回答は必ず以下のJSON形式を守ってください。
-注意：現在あるjsonキー以外は追加しないでください。
+%s`, questionsBuilder.String())
+	}
 
-{
-    "tag": {
-        "budget_jpy": 1000,
-        "travel_time": "車1時間"
-    },
-    "description": "魅力的な紹介文（100文字程度）",
+	var surveyExample string
+	if hasQuestions {
+		surveyExample = `,
     "survey": [
         // 質問リストにある数だけ、以下のオブジェクトを作成してください
         {
@@ -40,9 +38,30 @@ func BuildPlanPrompt(origin, destination string, questions []string) string {
             "question": "次の質問...",
             "answer": "次の回答..."
         }
-    ]
+    ]`
+	}
+
+	var jsonKeyNote string
+	if hasQuestions {
+		jsonKeyNote = "JSONキーは、tag、budget_jpy、travel_time、description、survey、question、answerのみを使用してください。"
+	} else {
+		jsonKeyNote = "JSONキーは、tag、budget_jpy、travel_time、descriptionのみを使用してください。survey、question、answerキーは含めないでください。"
+	}
+
+	return fmt.Sprintf(`あなたは熟練の旅行サポーターです。
+出発地「%s」から目的地「%s」への旅行プランを提案してください。
+%s
+回答は必ず以下のJSON形式を守ってください。
+注意：現在あるjsonキー以外は追加しないでください。
+
+{
+    "tag": {
+        "budget_jpy": 1000,
+        "travel_time": "車1時間"
+    },
+    "description": "魅力的な紹介文（100文字程度）"%s
 }
 
-JSONキーは、tag、budget_jpy、travel_time、description、survey、question、answerのみを使用してください。`,
-		origin, destination, questionsBuilder.String())
+%s`,
+		origin, destination, surveySection, surveyExample, jsonKeyNote)
 }

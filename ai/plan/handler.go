@@ -118,6 +118,8 @@ func (s *Server) HandlePlan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	plan.Image = GetImageURL(ctx, req.Destination)
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(plan); err != nil {
 		slog.Error("Response encode error", "error", err)

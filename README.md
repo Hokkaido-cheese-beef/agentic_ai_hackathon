@@ -161,7 +161,7 @@ LP (/) → グループ作成 (/trip-groups/new)
 # 依存関係インストール
 npm install
 
-# 環境変数設定 (.env.local)
+# 環境変数設定 (.env.sample)
 DATABASE_URL="mysql://root:root_password@localhost:3307/app_db"
 GOOGLE_GENERATIVE_AI_API_KEY="your-gemini-api-key"
 NEXT_PUBLIC_FIREBASE_API_KEY="..."
@@ -183,7 +183,7 @@ npm run dev
 DB / Firebase / AIキー一切不要で動作します。
 
 ```bash
-# .env.local に1行追加するだけ
+# .env に1行追加するだけ
 NEXT_PUBLIC_DEMO_MODE=true
 
 npm run dev

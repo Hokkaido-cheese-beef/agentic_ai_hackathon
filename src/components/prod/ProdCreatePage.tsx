@@ -35,7 +35,7 @@ export function ProdCreatePage() {
         }
         const createdId = payload?.tripGroup?.trip_group_id;
         if (typeof createdId === "string" && createdId.length > 0) {
-          router.push(`/trip-groups/${createdId}`);
+          router.push(`/trip-groups/${createdId}/invite`);
         } else {
           throw new Error("作成結果を取得できませんでした");
         }

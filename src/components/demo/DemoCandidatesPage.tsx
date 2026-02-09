@@ -141,6 +141,7 @@ export function DemoCandidatesPage({ tripGroupId }: Props) {
         isOpen={showQuestionModal}
         onClose={() => setShowQuestionModal(false)}
         candidateName={activeCandidate?.name ?? null}
+        candidatesCount={candidates.length}
         onSubmit={handleQuestionSubmit}
       />
       <AddCandidateModal

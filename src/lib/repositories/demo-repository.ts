@@ -43,7 +43,7 @@ export class DemoTripGroupRepository implements ITripGroupRepository {
 }
 
 export class DemoCandidateRepository implements ICandidateRepository {
-  async create(data: { name: string; sourceUrl?: string | null; tripGroupId: string }): Promise<TripCandidate> {
+  async create(data: { name: string; sourceUrl?: string | null; tripGroupId: string; createdBy?: string }): Promise<TripCandidate> {
     ensureSeeded();
     const candidate: TripCandidate = {
       id: generateUUID(),
@@ -58,6 +58,7 @@ export class DemoCandidateRepository implements ICandidateRepository {
       ai_summary: null,
       source_url: data.sourceUrl ?? null,
       created_at: new Date().toISOString(),
+      createdBy: data.createdBy,
     };
     demoStore.addCandidate(candidate);
     return candidate;

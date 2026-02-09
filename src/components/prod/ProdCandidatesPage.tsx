@@ -20,6 +20,7 @@ type Props = {
 
 export function ProdCandidatesPage({ tripGroupId }: Props) {
   const [groupName, setGroupName] = useState("");
+  const [departure, setDeparture] = useState<string | null>(null);
   const { candidates, isLoading: isInitialLoading } = useCandidatesRealtime(tripGroupId);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isFabOpen, setIsFabOpen] = useState(false);
@@ -39,12 +40,15 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
     onSwipeRight: swipeRight,
   });
 
-  // グループ名取得
+  // グループ名と出発地取得
   useEffect(() => {
     fetch(`/api/trip-groups/${tripGroupId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.tripGroup) setGroupName(data.tripGroup.name);
+        if (data.tripGroup) {
+          setGroupName(data.tripGroup.name);
+          setDeparture(data.tripGroup.departure);
+        }
       })
       .catch(() => {});
   }, [tripGroupId]);
@@ -63,6 +67,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
       candidate_name: name,
       source_url: sourceUrl,
       trip_group_id: tripGroupId,
+      origin: departure,
     }).catch(() => {});
 
     setShowAddCandidateModal(false);

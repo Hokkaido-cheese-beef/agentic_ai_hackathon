@@ -14,9 +14,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const { candidate_id, candidate_name, source_url, trip_group_id } = validated.data;
+    const { candidate_id, candidate_name, source_url, trip_group_id, origin } = validated.data;
 
-    const result = await (await getAiService()).summarize(candidate_name, source_url);
+    const result = await (await getAiService()).summarize(candidate_name, source_url, origin);
 
     const candidate = await (await getCandidateRepository()).update(candidate_id, trip_group_id, {
       description: result.description || null,

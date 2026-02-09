@@ -20,7 +20,8 @@ let aiService: IAiService | null = null;
 let demoRepoModule: typeof import("./repositories/demo-repository") | null = null;
 let prismaRepoModule: typeof import("./repositories/prisma-repository") | null = null;
 let prismaModule: typeof import("./prisma") | null = null;
-let aiServiceModule: typeof import("./services/ai-service") | null = null;
+let aiServiceModule: typeof import("./services/go-ai-service") | null = null;
+let demoAiServiceModule: typeof import("./services/demo-ai-service") | null = null;
 
 async function loadDemoRepo() {
   if (!demoRepoModule) demoRepoModule = await import("./repositories/demo-repository");
@@ -34,8 +35,13 @@ async function loadPrismaRepo() {
 }
 
 async function loadAiService() {
-  if (!aiServiceModule) aiServiceModule = await import("./services/ai-service");
-  return aiServiceModule;
+  if (isDemoMode()) {
+    if (!demoAiServiceModule) demoAiServiceModule = await import("./services/demo-ai-service");
+    return demoAiServiceModule;
+  } else {
+    if (!aiServiceModule) aiServiceModule = await import("./services/go-ai-service");
+    return aiServiceModule;
+  }
 }
 
 export async function getTripGroupRepository(): Promise<ITripGroupRepository> {
@@ -83,7 +89,7 @@ export async function getAiService(): Promise<IAiService> {
     if (isDemoMode()) {
       aiService = new mod.DemoAiService();
     } else {
-      aiService = new mod.GeminiAiService();
+      aiService = new mod.GoAiService();
     }
   }
   return aiService;

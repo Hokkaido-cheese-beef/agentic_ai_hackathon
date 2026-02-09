@@ -18,6 +18,6 @@ export interface AiStreamResult {
 }
 
 export interface IAiService {
-  summarize(candidateName: string, sourceUrl?: string | null): Promise<AiSummaryResult>;
+  summarize(candidateName: string, sourceUrl?: string | null, origin?: string | null): Promise<AiSummaryResult>;
   streamAnswer(question: string, candidateName: string | null, candidateInfo?: string): AiStreamResult;
 }

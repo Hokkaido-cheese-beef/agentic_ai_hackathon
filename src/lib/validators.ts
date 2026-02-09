@@ -22,8 +22,9 @@ export const createQuestionSchema = z.object({
 export const aiSummarizeSchema = z.object({
   candidate_id: z.string().uuid("候補IDが不正です"),
   candidate_name: z.string().min(1, "候補名が必要です").max(200),
-  source_url: z.string().url().max(2000).nullable().optional(),
+  source_url: z.string().url().max(2000).optional().nullable(),
   trip_group_id: z.string().uuid("グループIDが不正です"),
+  origin: z.string().max(200).optional().nullable(),
 });
 
 // --- AI Question ---

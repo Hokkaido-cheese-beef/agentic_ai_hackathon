@@ -24,7 +24,7 @@ export function DemoCreatePage() {
 
     demoCreateTripGroup(trimmedName)
       .then((group) => {
-        router.push(`/trip-groups/${group.trip_group_id}`);
+        router.push(`/trip-groups/${group.trip_group_id}/invite`);
       })
       .catch((err) => {
         setError(

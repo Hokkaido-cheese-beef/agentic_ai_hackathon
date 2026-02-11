@@ -32,14 +32,14 @@ async function loadFirestoreRepo() {
   return firestoreRepoModule;
 }
 
-async function loadAiService() {
-  if (isDemoMode()) {
-    if (!demoAiServiceModule) demoAiServiceModule = await import("./services/demo-ai-service");
-    return demoAiServiceModule;
-  } else {
-    if (!aiServiceModule) aiServiceModule = await import("./services/go-ai-service");
-    return aiServiceModule;
-  }
+async function loadDemoAiService() {
+  if (!demoAiServiceModule) demoAiServiceModule = await import("./services/demo-ai-service");
+  return demoAiServiceModule;
+}
+
+async function loadGoAiService() {
+  if (!aiServiceModule) aiServiceModule = await import("./services/go-ai-service");
+  return aiServiceModule;
 }
 
 export async function getTripGroupRepository(): Promise<ITripGroupRepository> {
@@ -82,13 +82,17 @@ export async function getQuestionRepository(): Promise<IQuestionRepository> {
 }
 
 export async function getAiService(): Promise<IAiService> {
-  if (!aiService) {
-    const mod = await loadAiService();
-    if (isDemoMode()) {
-      aiService = new mod.DemoAiService();
-    } else {
-      aiService = new mod.GoAiService();
-    }
+  if (aiService) {
+    return aiService;
   }
+
+  if (isDemoMode()) {
+    const mod = await loadDemoAiService();
+    aiService = new mod.DemoAiService();
+    return aiService;
+  }
+
+  const mod = await loadGoAiService();
+  aiService = new mod.GoAiService();
   return aiService;
 }

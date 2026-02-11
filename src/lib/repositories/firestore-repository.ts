@@ -52,6 +52,7 @@ function toCandidateDomain(tripGroupId: string, candidateId: string, data: Recor
     ai_summary: normalizeAiSummary(data.ai_summary),
     source_url: (data.source_url as string | null) ?? null,
     created_at: normalizeDate(data.created_at) || nowIso(),
+    createdBy: (data.createdBy as string | undefined) ?? undefined,
   };
 }
 
@@ -105,7 +106,7 @@ export class FirestoreTripGroupRepository implements ITripGroupRepository {
 }
 
 export class FirestoreCandidateRepository implements ICandidateRepository {
-  async create(data: { name: string; sourceUrl?: string | null; tripGroupId: string }): Promise<TripCandidate> {
+  async create(data: { name: string; sourceUrl?: string | null; tripGroupId: string; createdBy?: string }): Promise<TripCandidate> {
     const candidateId = crypto.randomUUID();
     const createdAt = nowIso();
 
@@ -126,6 +127,7 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
             tags: [],
             info: null,
             ai_summary: null,
+            createdBy: data.createdBy ?? null,
             created_at: createdAt,
             updated_at: FieldValue.serverTimestamp(),
           }),
@@ -145,6 +147,7 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
       ai_summary: null,
       source_url: data.sourceUrl ?? null,
       created_at: createdAt,
+      createdBy: data.createdBy,
     };
   }
 

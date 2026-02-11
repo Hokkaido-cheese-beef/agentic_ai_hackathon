@@ -64,7 +64,7 @@ export class DemoCandidateRepository implements ICandidateRepository {
     return candidate;
   }
 
-  async findById(candidateId: string): Promise<TripCandidate | null> {
+  async findById(_tripGroupId: string, candidateId: string): Promise<TripCandidate | null> {
     ensureSeeded();
     return demoStore.getCandidate(candidateId) ?? null;
   }

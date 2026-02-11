@@ -20,8 +20,8 @@ export interface ITripGroupRepository {
 }
 
 export interface ICandidateRepository {
-  create(data: { name: string; sourceUrl?: string | null; tripGroupId: string; createdBy?: string }): Promise<TripCandidate>;
-  findById(candidateId: string): Promise<TripCandidate | null>;
+  create(data: { name: string; sourceUrl?: string | null; tripGroupId: string }): Promise<TripCandidate>;
+  findById(tripGroupId: string, candidateId: string): Promise<TripCandidate | null>;
   findByGroupId(tripGroupId: string): Promise<TripCandidate[]>;
   update(candidateId: string, tripGroupId: string, data: Partial<CandidateUpdateData>): Promise<TripCandidate>;
 }

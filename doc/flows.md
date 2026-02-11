@@ -14,16 +14,16 @@ LP (/) → グループ作成 (/trip-groups/new)
 ```
 [候補追加]
   AddCandidateModal → POST /api/trip-groups/[id]/candidates
-    → Prisma INSERT → Firestore sync (fire-and-forget)
+    → Firestore INSERT (tripGroups/{id}/candidates)
   → POST /api/ai/summarize
     → Gemini 2.0 Flash → JSON構造化出力
-    → Prisma UPDATE → Firestore sync
+    → Firestore UPDATE
     → onSnapshot → UI即時更新
 
 [質問]
   QuestionModal → POST /api/trip-groups/[id]/questions
-    → Prisma INSERT → Firestore sync
+    → Firestore INSERT (tripGroups/{id}/questions)
   → POST /api/ai/question
     → Gemini 2.0 Flash → streamText → toTextStreamResponse()
-    → onFinish: Prisma UPDATE + Firestore sync
+    → onFinish: Firestore UPDATE
 ```

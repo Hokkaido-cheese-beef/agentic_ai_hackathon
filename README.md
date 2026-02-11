@@ -40,7 +40,13 @@ npm install
 npm run db:up
 ```
 
-3. マイグレーション適用 → 開発サーバー起動
+3. Go API サーバーを起動
+
+```bash
+go -C ai run .
+```
+
+4. マイグレーション適用 → 開発サーバー起動
 
 ```bash
 npx prisma migrate dev --name init

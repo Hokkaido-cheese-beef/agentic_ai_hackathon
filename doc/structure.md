@@ -61,15 +61,16 @@ src/
 │   ├── validators.ts                     # Zodスキーマ (入力/AI応答検証)
 │   ├── sanitize.ts                       # AIプロンプトサニタイズ (<>{}[] 除去)
 │   ├── retry.ts                          # 指数バックオフリトライ (3回/500ms基底)
-│   ├── prisma.ts                         # Prismaクライアント (デモモード切替)
 │   ├── firebase.ts                       # Firebase Client SDK初期化
 │   ├── firebase-admin.ts                 # Firebase Admin SDK初期化
-│   ├── firestore-sync.ts                 # Prisma→Firestore同期 (5関数)
+│   ├── repositories/                     # データアクセス層
+│   │   ├── interfaces.ts                 # リポジトリIF
+│   │   ├── firestore-repository.ts       # Firestore実装
+│   │   └── demo-repository.ts            # デモ実装
 │   └── demo/                             # デモモード用モジュール
 │       ├── config.ts                     # isDemoMode() 判定
 │       ├── store.ts                      # インメモリリアクティブストア
 │       ├── mock-data.ts                  # 初期デモデータ (3候補地)
-│       ├── mock-prisma.ts                # Prisma互換モック
 │       └── mock-ai.ts                    # AI応答モック (要約+ストリーミング)
 │
 ├── types/

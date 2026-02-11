@@ -81,7 +81,7 @@ export class GoAiService implements IAiService {
       async start(controller) {
         try {
           const response = await callPlanApi(request);
-          const answer = response.survey[0]?.answer || "回答を取得できませんでした";
+          const answer = response.survey?.[0]?.answer || "回答を取得できませんでした";
 
           // ストリーミング風にチャンク分割して送信
           const encoder = new TextEncoder();

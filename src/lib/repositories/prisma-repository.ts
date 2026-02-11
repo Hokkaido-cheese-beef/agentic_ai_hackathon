@@ -25,7 +25,7 @@ function syncTripGroup(group: { trip_group_id: string; name: string; departure?:
   ).catch((e) => console.error("Firestore sync failed (tripGroup):", e));
 }
 
-function syncCandidate(tripGroupId: string, candidate: { id: string; name: string; source_url?: string | null }) {
+function syncCandidate(tripGroupId: string, candidate: { id: string; name: string; source_url?: string | null; createdBy?: string }) {
   withRetry(
     () =>
       adminDb.collection("tripGroups").doc(tripGroupId).collection("candidates").doc(candidate.id).set({
@@ -38,6 +38,7 @@ function syncCandidate(tripGroupId: string, candidate: { id: string; name: strin
         tags: [],
         info: null,
         ai_summary: null,
+        createdBy: candidate.createdBy || null,
         updated_at: FieldValue.serverTimestamp(),
       }),
     { label: "syncCandidate" }
@@ -115,12 +116,13 @@ export class PrismaTripGroupRepository implements ITripGroupRepository {
 export class PrismaCandidateRepository implements ICandidateRepository {
   constructor(private db: PrismaClient) {}
 
-  async create(data: { name: string; sourceUrl?: string | null; tripGroupId: string }): Promise<TripCandidate> {
+  async create(data: { name: string; sourceUrl?: string | null; tripGroupId: string; createdBy?: string }): Promise<TripCandidate> {
     const candidate = await this.db.tripCandidate.create({
       data: { name: data.name, source_url: data.sourceUrl ?? null, trip_group_id: data.tripGroupId },
     });
     const result = toCandidateDomain(candidate as unknown as Record<string, unknown>);
-    syncCandidate(data.tripGroupId, candidate);
+    // createdBy を含めて Firestore に同期
+    syncCandidate(data.tripGroupId, { ...candidate, createdBy: data.createdBy });
     return result;
   }
 

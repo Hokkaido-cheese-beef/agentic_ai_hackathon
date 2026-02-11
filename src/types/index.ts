@@ -43,6 +43,7 @@ export interface TripCandidate {
   ai_summary: AiSummary | null;
   source_url: string | null;
   created_at: string;
+  createdBy?: string; // セッションID or ユーザーID
 }
 
 // --- Question ---
@@ -67,6 +68,7 @@ export interface FirestoreCandidate {
   ai_summary: AiSummary | null;
   source_url: string | null;
   updated_at: unknown; // Firestore Timestamp
+  createdBy?: string; // セッションID or ユーザーID
 }
 
 export interface FirestoreQuestion {

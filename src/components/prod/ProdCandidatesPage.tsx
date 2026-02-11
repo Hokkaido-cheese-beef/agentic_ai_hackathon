@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -19,6 +19,17 @@ type Props = {
 };
 
 export function ProdCandidatesPage({ tripGroupId }: Props) {
+  // セッションID管理（localStorage に永続化）
+  const sessionId = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    let id = localStorage.getItem("tripvote_session_id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("tripvote_session_id", id);
+    }
+    return id;
+  }, []);
+
   const [groupName, setGroupName] = useState("");
   const [departure, setDeparture] = useState<string | null>(null);
   const { candidates, isLoading: isInitialLoading } = useCandidatesRealtime(tripGroupId);
@@ -58,7 +69,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
   const handleAddCandidate = async (name: string, sourceUrl: string | null) => {
     const data = await post<{ candidate: { id: string } }>(
       `/api/trip-groups/${tripGroupId}/candidates`,
-      { name, source_url: sourceUrl }
+      { name, source_url: sourceUrl, createdBy: sessionId }
     );
 
     // バックグラウンドでAI分析

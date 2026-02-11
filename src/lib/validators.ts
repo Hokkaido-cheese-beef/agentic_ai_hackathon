@@ -10,6 +10,7 @@ export const createTripGroupSchema = z.object({
 export const createCandidateSchema = z.object({
   name: z.string().min(1, "候補名を入力してください").max(200),
   source_url: z.string().url().max(2000).nullable().optional(),
+  createdBy: z.string().optional(), // セッションID or ユーザーID
 });
 
 // --- Questions ---

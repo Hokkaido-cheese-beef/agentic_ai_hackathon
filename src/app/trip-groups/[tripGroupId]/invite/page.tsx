@@ -46,7 +46,7 @@ export default async function InvitePage({ params }: InvitePageProps) {
   )}`;
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="mx-auto min-h-screen max-w-[430px] bg-surface shadow-lg">
       <AppHeader />
 
       <div className="mx-auto max-w-[395px] flex flex-col gap-5 p-6">

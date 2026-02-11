@@ -80,7 +80,7 @@ export function DemoCandidatesPage({ tripGroupId }: Props) {
   };
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="relative mx-auto min-h-screen max-w-[430px] bg-surface shadow-lg">
       <AppHeader groupName={groupName} />
 
       {/* Pill Tab Navigation */}
@@ -134,6 +134,7 @@ export function DemoCandidatesPage({ tripGroupId }: Props) {
           setIsFabOpen(false);
           setShowQuestionModal(true);
         }}
+        hasCandidates={candidates.length > 0}
       />
 
       {/* Modals */}

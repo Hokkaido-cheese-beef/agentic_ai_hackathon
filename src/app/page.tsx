@@ -69,7 +69,7 @@ export default function TopPage() {
   };
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="mx-auto min-h-screen max-w-[430px] bg-surface shadow-lg">
       <div className="mx-auto max-w-[395px] flex flex-col gap-6 px-6 pt-12 pb-12">
         {/* Logo Section */}
         <div className="flex flex-col items-center gap-3">

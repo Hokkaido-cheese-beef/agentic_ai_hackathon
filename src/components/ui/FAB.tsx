@@ -7,20 +7,21 @@ type FABProps = {
   onToggle: () => void;
   onAddSpot: () => void;
   onAddQuestion: () => void;
+  hasCandidates?: boolean;
 };
 
-export function FAB({ isOpen, onToggle, onAddSpot, onAddQuestion }: FABProps) {
+export function FAB({ isOpen, onToggle, onAddSpot, onAddQuestion, hasCandidates = true }: FABProps) {
   return (
     <>
       {isOpen && (
         <div
           data-testid="fab-overlay"
-          className="fixed inset-0 bg-black/20 z-40"
+          className="absolute inset-0 bg-black/20 z-40"
           onClick={onToggle}
         />
       )}
 
-      <div className="fixed right-5 bottom-5 z-50 flex flex-col items-end gap-2">
+      <div className="absolute right-5 bottom-5 z-50 flex flex-col items-end gap-2">
         {isOpen && (
           <div className="flex flex-col items-end gap-2 mb-2">
             <button
@@ -32,10 +33,11 @@ export function FAB({ isOpen, onToggle, onAddSpot, onAddQuestion }: FABProps) {
             </button>
             <button
               onClick={onAddQuestion}
-              className="flex items-center gap-2.5 rounded-2xl bg-white px-4 py-3 shadow-[0_4px_16px_var(--shadow-dark)]"
+              disabled={!hasCandidates}
+              className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 shadow-[0_4px_16px_var(--shadow-dark)] ${hasCandidates ? "bg-white" : "bg-gray-100 opacity-50 cursor-not-allowed"}`}
             >
-              <MessageCircle className="h-5 w-5 text-[#8B5CF6]" />
-              <span className="text-sm font-medium text-foreground">質問を追加</span>
+              <MessageCircle className={`h-5 w-5 ${hasCandidates ? "text-[#8B5CF6]" : "text-gray-400"}`} />
+              <span className={`text-sm font-medium ${hasCandidates ? "text-foreground" : "text-gray-400"}`}>質問を追加</span>
             </button>
           </div>
         )}

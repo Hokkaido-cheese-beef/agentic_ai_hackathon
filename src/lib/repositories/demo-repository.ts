@@ -23,7 +23,13 @@ function generateUUID(): string {
 }
 
 export class DemoTripGroupRepository implements ITripGroupRepository {
-  async create(data: { name: string; departure?: string | null }): Promise<TripGroup> {
+  async create(data: {
+    name: string;
+    departure?: string | null;
+    departure_type?: string;
+    departure_value?: string;
+    departure_raw?: string;
+  }): Promise<TripGroup> {
     ensureSeeded();
     const group: TripGroup = {
       trip_group_id: generateUUID(),
@@ -31,6 +37,9 @@ export class DemoTripGroupRepository implements ITripGroupRepository {
       departure: data.departure ?? null,
       status: "draft",
       created_at: new Date().toISOString(),
+      departure_type: data.departure_type as "text" | "geolocation" | "postal_code" | undefined,
+      departure_value: data.departure_value,
+      departure_raw: data.departure_raw,
     };
     demoStore.addTripGroup(group);
     return group;

@@ -14,11 +14,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, departure } = parsed.data;
+    const { name, departure, departure_type, departure_value, departure_raw } = parsed.data;
 
     const tripGroup = await (await getTripGroupRepository()).create({
       name: name.trim(),
       departure: departure?.trim() || null,
+      departure_type,
+      departure_value: departure_value?.trim(),
+      departure_raw: departure_raw?.trim(),
     });
 
     return NextResponse.json({ tripGroup }, { status: 201 });

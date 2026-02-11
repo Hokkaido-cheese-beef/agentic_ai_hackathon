@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   MapPin,
@@ -9,6 +9,7 @@ import {
   Sparkles,
   CheckCircle,
   MessageCircle,
+  Navigation,
 } from "lucide-react";
 import { post } from "@/lib/api";
 import { isDemo } from "@/lib/config";
@@ -18,46 +19,131 @@ import { ErrorMessage } from "@/components/ui/ErrorMessage";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { FeatureCard } from "@/components/landing/FeatureCard";
 import { StepCard } from "@/components/landing/StepCard";
+import type { DepartureType } from "@/types";
 
 export default function TopPage() {
   const router = useRouter();
   const [groupName, setGroupName] = useState("");
   const [departure, setDeparture] = useState("");
+  const [departureType, setDepartureType] = useState<DepartureType>("text");
+  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+  const [suggestion, setSuggestion] = useState<{ value: string; label: string; type: DepartureType } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [locationAttempted, setLocationAttempted] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-  const handleGetLocation = () => {
-    if (!navigator.geolocation) {
-      setError("位置情報を取得できませんでした");
-      return;
-    }
+  // マウント時に位置情報を自動推測（候補として保持）
+  useEffect(() => {
+    if (locationAttempted) return;
+    if (!navigator.geolocation) return;
+    setLocationAttempted(true);
+    setIsLoadingLocation(true);
+
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setDeparture(`${pos.coords.latitude},${pos.coords.longitude}`);
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+
+        // Nominatim地名フォールバック
+        const setFallback = (address: Record<string, string> | null, displayName: string | null) => {
+          const city = address?.city || address?.town || address?.village || address?.suburb || "";
+          const state = address?.state || address?.province || "";
+          const locationName = [city, state].filter(Boolean).join(", ");
+          setSuggestion({
+            value: locationName || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+            label: displayName || locationName || `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+            type: "geolocation",
+          });
+        };
+
+        try {
+          // 1. Nominatim で郵便番号を取得
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=ja`,
+            { headers: { "User-Agent": "TripVote-App" } }
+          );
+          const data = await response.json();
+          const address = data.address;
+          const postalCode = (address?.postcode || "").replace("-", "");
+
+          if (postalCode) {
+            // 2. zipcloud で住所変換
+            try {
+              const zipRes = await fetch(
+                `https://zipcloud.ibsnet.co.jp/api/search?zipcode=${postalCode}`
+              );
+              const zipData = await zipRes.json();
+              const result = zipData.results?.[0];
+              if (result) {
+                const fullAddress = `${result.address1}${result.address2}${result.address3}`;
+                setSuggestion({ value: fullAddress, label: fullAddress, type: "geolocation" });
+              } else {
+                setFallback(address, data.display_name);
+              }
+            } catch {
+              setFallback(address, data.display_name);
+            }
+          } else {
+            setFallback(address, data.display_name);
+          }
+        } catch (err) {
+          console.error("逆ジオコーディング失敗:", err);
+          setSuggestion({
+            value: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+            label: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`,
+            type: "geolocation",
+          });
+        } finally {
+          setIsLoadingLocation(false);
+        }
       },
       () => {
-        setError("位置情報を取得できませんでした");
+        setIsLoadingLocation(false);
       }
     );
+  }, [locationAttempted]);
+
+  const handleSelectSuggestion = () => {
+    if (!suggestion) return;
+    setDeparture(suggestion.value);
+    setDepartureType(suggestion.type);
   };
 
+  const showSuggestion = isFocused && suggestion && !departure;
+
   const handleSubmit = async () => {
-    if (!groupName.trim()) return;
+    const trimmedName = groupName.trim();
+    const trimmedDeparture = departure.trim();
+
+    if (!trimmedName) {
+      setError("グループ名を入力してください");
+      return;
+    }
+
+    if (!trimmedDeparture) {
+      setError("出発地点を入力してください");
+      return;
+    }
 
     setIsSubmitting(true);
     setError(null);
 
     try {
       if (isDemo()) {
-        const group = await demoCreateTripGroup(groupName.trim());
+        const group = await demoCreateTripGroup(trimmedName, {
+          departure_type: departureType,
+          departure_value: trimmedDeparture,
+          departure_raw: trimmedDeparture,
+        });
         router.push(`/trip-groups/${group.trip_group_id}`);
       } else {
         const data = await post<{ tripGroup: { trip_group_id: string } }>(
           "/api/trip-groups",
           {
-            name: groupName.trim(),
-            departure: departure.trim() || null,
-            status: "draft",
+            name: trimmedName,
+            departure_type: departureType,
+            departure_value: trimmedDeparture,
+            departure_raw: trimmedDeparture,
           }
         );
         router.push(`/trip-groups/${data.tripGroup.trip_group_id}`);
@@ -87,27 +173,53 @@ export default function TopPage() {
         {/* Form Card */}
         <div className="flex flex-col gap-4 rounded-[20px] bg-white p-5 border border-border">
           <div className="flex flex-col gap-2">
-            <SectionLabel>グループ名</SectionLabel>
+            <SectionLabel>
+              グループ名 <span className="text-red-500">*</span>
+            </SectionLabel>
             <input
               type="text"
-              placeholder="例：沖縄旅行 2026"
+              placeholder="例：沖縄旅行"
               value={groupName}
               onChange={(e) => setGroupName(e.target.value)}
-              className="h-12 rounded-xl bg-surface px-4 text-[15px] text-foreground placeholder:text-text-muted outline-none"
+              className="w-full h-12 rounded-xl bg-surface px-4 text-[15px] text-foreground placeholder:text-text-muted outline-none"
             />
           </div>
           <div className="flex flex-col gap-2">
-            <SectionLabel>出発地点（任意）</SectionLabel>
-            <button
-              type="button"
-              onClick={handleGetLocation}
-              className="flex h-12 items-center gap-2 rounded-xl bg-surface px-4"
-            >
-              <MapPin className="h-[18px] w-[18px] text-text-secondary" />
-              <span className="text-[15px] text-text-secondary">
-                {departure || "現在地を取得"}
-              </span>
-            </button>
+            <SectionLabel>
+              出発地点 <span className="text-red-500">*</span>
+            </SectionLabel>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="例：東京駅、渋谷区"
+                value={departure}
+                onChange={(e) => {
+                  setDeparture(e.target.value);
+                  setDepartureType("text");
+                }}
+                onFocus={() => setIsFocused(true)}
+                onBlur={() => setTimeout(() => setIsFocused(false), 150)}
+                className="w-full h-12 rounded-xl bg-surface px-4 text-[15px] text-foreground placeholder:text-text-muted outline-none"
+              />
+              {isLoadingLocation && (
+                <div className="absolute right-3.5 top-1/2 -translate-y-1/2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+                </div>
+              )}
+              {showSuggestion && (
+                <button
+                  type="button"
+                  onClick={handleSelectSuggestion}
+                  className="absolute left-0 right-0 top-full mt-1 z-10 flex items-center gap-2.5 rounded-xl bg-white border border-border p-3 shadow-lg text-left hover:bg-surface transition"
+                >
+                  <Navigation className="h-4 w-4 text-primary shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium text-foreground">現在地から設定</p>
+                    <p className="text-xs text-text-muted truncate">{suggestion.label}</p>
+                  </div>
+                </button>
+              )}
+            </div>
           </div>
         </div>
 
@@ -117,7 +229,7 @@ export default function TopPage() {
           icon={<Plus className="h-5 w-5" />}
           isLoading={isSubmitting}
           loadingText="作成中..."
-          disabled={!groupName.trim()}
+          disabled={!groupName.trim() || !departure.trim()}
           onClick={handleSubmit}
           className="w-full rounded-2xl"
         >

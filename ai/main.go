@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Hokkaido-cheese-beef/agentic_ai_hackathon/ai/plan"
+	"github.com/joho/godotenv"
 )
 
 func corsMiddleware(next http.Handler) http.Handler {
@@ -27,9 +28,27 @@ func corsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func loadDotEnv() {
+	paths := []string{}
+	if _, err := os.Stat(".env"); err == nil {
+		paths = append(paths, ".env")
+	}
+	if _, err := os.Stat("../.env"); err == nil {
+		paths = append(paths, "../.env")
+	}
+	if len(paths) == 0 {
+		return
+	}
+	if err := godotenv.Load(paths...); err != nil {
+		slog.Warn("Failed to load .env", "error", err)
+	}
+}
+
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
 	defer stop()
+
+	loadDotEnv()
 
 	// Server の初期化
 	server, err := plan.NewServer(ctx)

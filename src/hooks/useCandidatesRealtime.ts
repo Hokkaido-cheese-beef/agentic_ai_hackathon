@@ -10,11 +10,6 @@ export function useCandidatesRealtime(tripGroupId: string) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // セッションIDを取得（localStorage から）
-    const sessionId = typeof window !== "undefined"
-      ? localStorage.getItem("tripvote_session_id") || ""
-      : "";
-
     const unsub = onSnapshot(
       collection(getDb(), "tripGroups", tripGroupId, "candidates"),
       (snapshot) => {
@@ -27,12 +22,7 @@ export function useCandidatesRealtime(tripGroupId: string) {
           ai_summary: doc.data().ai_summary || null,
         })) as TripCandidate[];
 
-        // 自分が作成した候補のみフィルタリング
-        const myCandidates = allCandidates.filter(
-          (c) => c.createdBy === sessionId
-        );
-
-        setCandidates(myCandidates);
+        setCandidates(allCandidates);
         setIsLoading(false);
       },
       () => {

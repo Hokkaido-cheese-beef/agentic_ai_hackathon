@@ -57,10 +57,7 @@ export class GoAiService implements IAiService {
     const request: GoAiPlanRequest = {
       origin: origin || "日本",
       destination: candidateName,
-      questions: [
-        `${candidateName}の営業時間、料金、アクセスなどの実用的な基本情報を教えてください`,
-        `${candidateName}の最大の魅力や特徴を1文で教えてください`,
-      ],
+      questions: [],
     };
 
     // /plan と /image を並行して呼び出す
@@ -70,7 +67,8 @@ export class GoAiService implements IAiService {
     ]);
 
     // Go の /plan レスポンスを AiSummaryResult に変換
-    // description → 概要説明, survey[0] → 実用情報(info), survey[1] → 魅力ハイライト(headline)
+    // TODO: Go AI側でinfo/headline用の個別フィールドが追加されたら対応する
+    // 現状は description のみ使用し、info と headline は重複させない
     return {
       description: response.description || "",
       rating: 4.0, // デフォルト値（/plan では rating なし）
@@ -91,10 +89,10 @@ export class GoAiService implements IAiService {
           bgColor: "#FFFBEB",
         },
       ],
-      info: response.survey?.[0]?.answer || "",
+      info: "",
       aiSummary: {
-        headline: response.survey?.[1]?.answer || "",
-        qa: [],
+        headline: "",
+        qa: response.survey ? response.survey.map((s) => ({ q: s.question, a: s.answer })) : [],
       },
       imageUrl,
     };

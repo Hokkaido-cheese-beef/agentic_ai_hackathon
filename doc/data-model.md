@@ -1,24 +1,19 @@
-# データモデル (Prisma)
+# データモデル (Firestore)
 
 ```
-TripGroup (trip_groups)
-├── trip_group_id: UUID [PK]
-├── name, departure?, status (draft/active/completed)
-├── created_at
-├── → TripCandidate[] (1:N)
-└── → Question[] (1:N)
-
-TripCandidate (trip_candidates)
-├── id: UUID [PK]
-├── trip_group_id: UUID [FK]
-├── name, description?, image_url?, rating?, review_count?
-├── tags (JSON), info?, ai_summary (JSON), source_url?
-├── created_at
-└── → Question[] (1:N)
-
-Question (questions)
-├── id: UUID [PK]
-├── candidate_id?: UUID [FK], trip_group_id: UUID [FK]
-├── content, ai_answer?
-└── created_at
+tripGroups (collection)
+└── {tripGroupId} (document)
+    ├── name, departure?, status (draft/active/completed)
+    ├── created_at, updated_at
+    ├── candidates (subcollection)
+    │   └── {candidateId}
+    │       ├── name, source_url?
+    │       ├── description?, image_url?, rating?, review_count?
+    │       ├── tags, info?, ai_summary?
+    │       └── created_at, updated_at
+    └── questions (subcollection)
+        └── {questionId}
+            ├── content, candidate_id?
+            ├── ai_answer?, ai_streaming
+            └── created_at, updated_at
 ```

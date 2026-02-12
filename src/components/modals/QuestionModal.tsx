@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -11,6 +11,7 @@ type QuestionModalProps = {
   isOpen: boolean;
   onClose: () => void;
   candidateName: string | null;
+  candidatesCount: number;
   onSubmit: (questionText: string, isAllCandidates: boolean) => Promise<void>;
 };
 
@@ -18,12 +19,21 @@ export function QuestionModal({
   isOpen,
   onClose,
   candidateName,
+  candidatesCount,
   onSubmit,
 }: QuestionModalProps) {
   const [questionText, setQuestionText] = useState("");
-  const [isAllCandidates, setIsAllCandidates] = useState(false);
+  // 候補が0件の場合は強制的に全体への質問にする
+  const [isAllCandidates, setIsAllCandidates] = useState(candidatesCount === 0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // candidatesCount が変わったらチェックボックス状態を更新
+  useEffect(() => {
+    if (candidatesCount === 0) {
+      setIsAllCandidates(true);
+    }
+  }, [candidatesCount]);
 
   // candidateName を利用して lint unused 警告を防止（将来の表示拡張用）
   void candidateName;
@@ -73,6 +83,7 @@ export function QuestionModal({
           checked={isAllCandidates}
           onChange={() => setIsAllCandidates(!isAllCandidates)}
           label="全候補への質問にする"
+          disabled={candidatesCount === 0}
         />
 
         <Button

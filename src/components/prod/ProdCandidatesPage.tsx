@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -19,7 +19,19 @@ type Props = {
 };
 
 export function ProdCandidatesPage({ tripGroupId }: Props) {
+  // セッションID管理（localStorage に永続化）
+  const sessionId = useMemo(() => {
+    if (typeof window === "undefined") return "";
+    let id = localStorage.getItem("tripvote_session_id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("tripvote_session_id", id);
+    }
+    return id;
+  }, []);
+
   const [groupName, setGroupName] = useState("");
+  const [departure, setDeparture] = useState<string | null>(null);
   const { candidates, isLoading: isInitialLoading } = useCandidatesRealtime(tripGroupId);
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const [isFabOpen, setIsFabOpen] = useState(false);
@@ -39,12 +51,15 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
     onSwipeRight: swipeRight,
   });
 
-  // グループ名取得
+  // グループ名と出発地取得
   useEffect(() => {
     fetch(`/api/trip-groups/${tripGroupId}`)
       .then((res) => res.json())
       .then((data) => {
-        if (data.tripGroup) setGroupName(data.tripGroup.name);
+        if (data.tripGroup) {
+          setGroupName(data.tripGroup.name);
+          setDeparture(data.tripGroup.departure);
+        }
       })
       .catch(() => {});
   }, [tripGroupId]);
@@ -54,7 +69,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
   const handleAddCandidate = async (name: string, sourceUrl: string | null) => {
     const data = await post<{ candidate: { id: string } }>(
       `/api/trip-groups/${tripGroupId}/candidates`,
-      { name, source_url: sourceUrl }
+      { name, source_url: sourceUrl, createdBy: sessionId }
     );
 
     // バックグラウンドでAI分析
@@ -63,6 +78,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
       candidate_name: name,
       source_url: sourceUrl,
       trip_group_id: tripGroupId,
+      origin: departure,
     }).catch(() => {});
 
     setShowAddCandidateModal(false);
@@ -96,7 +112,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
   };
 
   return (
-    <main className="min-h-screen bg-surface">
+    <main className="relative mx-auto min-h-screen max-w-[430px] bg-surface shadow-lg">
       <AppHeader groupName={groupName} />
 
       {/* Pill Tab Navigation */}
@@ -150,6 +166,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
           setIsFabOpen(false);
           setShowQuestionModal(true);
         }}
+        hasCandidates={candidates.length > 0}
       />
 
       {/* Modals */}
@@ -157,6 +174,7 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
         isOpen={showQuestionModal}
         onClose={() => setShowQuestionModal(false)}
         candidateName={activeCandidate?.name ?? null}
+        candidatesCount={candidates.length}
         onSubmit={handleQuestionSubmit}
       />
       <AddCandidateModal

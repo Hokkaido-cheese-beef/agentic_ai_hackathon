@@ -17,7 +17,7 @@ export async function POST(request: Request) {
 
     let candidateInfo = "";
     if (candidate_id) {
-      const candidate = await (await getCandidateRepository()).findById(candidate_id);
+      const candidate = await (await getCandidateRepository()).findById(trip_group_id, candidate_id);
       if (candidate) {
         candidateInfo = `\n\n候補情報:\n名前: ${candidate.name}\n説明: ${candidate.description || "なし"}\n詳細: ${candidate.info || "なし"}`;
       }
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
 
         // 指定候補の ai_summary.qa に追記
         if (candidate_id) {
-          const c = await candidateRepo.findById(candidate_id);
+          const c = await candidateRepo.findById(trip_group_id, candidate_id);
           if (c) {
             const current = c.ai_summary ?? { headline: "", qa: [] };
             await candidateRepo.update(candidate_id, trip_group_id, {

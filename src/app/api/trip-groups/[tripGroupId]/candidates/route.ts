@@ -37,7 +37,7 @@ export async function POST(
       );
     }
 
-    const { name, source_url } = validated.data;
+    const { name, source_url, createdBy } = validated.data;
 
     const tripGroup = await (await getTripGroupRepository()).findById(tripGroupId);
 
@@ -52,6 +52,7 @@ export async function POST(
       name: name.trim(),
       sourceUrl: source_url ?? null,
       tripGroupId,
+      createdBy,
     });
 
     return NextResponse.json({ candidate }, { status: 201 });

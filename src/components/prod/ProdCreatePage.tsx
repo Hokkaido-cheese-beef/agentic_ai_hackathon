@@ -35,7 +35,7 @@ export function ProdCreatePage() {
         }
         const createdId = payload?.tripGroup?.trip_group_id;
         if (typeof createdId === "string" && createdId.length > 0) {
-          router.push(`/trip-groups/${createdId}`);
+          router.push(`/trip-groups/${createdId}/invite`);
         } else {
           throw new Error("作成結果を取得できませんでした");
         }
@@ -51,7 +51,7 @@ export function ProdCreatePage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-white px-4 text-center">
+    <main className="mx-auto flex min-h-screen max-w-[430px] flex-col items-center justify-center gap-8 bg-white px-4 text-center shadow-lg">
       <div>
         <p className="text-sm text-zinc-500">グループ管理</p>
         <h1 className="text-3xl font-semibold text-zinc-900">新しいグループを作成</h1>

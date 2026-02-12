@@ -4,6 +4,7 @@ go 1.25.7
 
 require (
 	github.com/go-playground/validator/v10 v10.30.1
+	github.com/joho/godotenv v1.5.1
 	google.golang.org/genai v1.45.0
 )
 

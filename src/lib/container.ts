@@ -18,23 +18,27 @@ let aiService: IAiService | null = null;
 
 // 遅延ロード用プロミスキャッシュ
 let demoRepoModule: typeof import("./repositories/demo-repository") | null = null;
-let prismaRepoModule: typeof import("./repositories/prisma-repository") | null = null;
-let prismaModule: typeof import("./prisma") | null = null;
-let aiServiceModule: typeof import("./services/ai-service") | null = null;
+let firestoreRepoModule: typeof import("./repositories/firestore-repository") | null = null;
+let aiServiceModule: typeof import("./services/go-ai-service") | null = null;
+let demoAiServiceModule: typeof import("./services/demo-ai-service") | null = null;
 
 async function loadDemoRepo() {
   if (!demoRepoModule) demoRepoModule = await import("./repositories/demo-repository");
   return demoRepoModule;
 }
 
-async function loadPrismaRepo() {
-  if (!prismaRepoModule) prismaRepoModule = await import("./repositories/prisma-repository");
-  if (!prismaModule) prismaModule = await import("./prisma");
-  return { prismaRepoModule, prismaModule };
+async function loadFirestoreRepo() {
+  if (!firestoreRepoModule) firestoreRepoModule = await import("./repositories/firestore-repository");
+  return firestoreRepoModule;
 }
 
-async function loadAiService() {
-  if (!aiServiceModule) aiServiceModule = await import("./services/ai-service");
+async function loadDemoAiService() {
+  if (!demoAiServiceModule) demoAiServiceModule = await import("./services/demo-ai-service");
+  return demoAiServiceModule;
+}
+
+async function loadGoAiService() {
+  if (!aiServiceModule) aiServiceModule = await import("./services/go-ai-service");
   return aiServiceModule;
 }
 
@@ -44,8 +48,8 @@ export async function getTripGroupRepository(): Promise<ITripGroupRepository> {
       const mod = await loadDemoRepo();
       tripGroupRepo = new mod.DemoTripGroupRepository();
     } else {
-      const { prismaRepoModule: repo, prismaModule: db } = await loadPrismaRepo();
-      tripGroupRepo = new repo.PrismaTripGroupRepository(db.prisma);
+      const repo = await loadFirestoreRepo();
+      tripGroupRepo = new repo.FirestoreTripGroupRepository();
     }
   }
   return tripGroupRepo;
@@ -57,8 +61,8 @@ export async function getCandidateRepository(): Promise<ICandidateRepository> {
       const mod = await loadDemoRepo();
       candidateRepo = new mod.DemoCandidateRepository();
     } else {
-      const { prismaRepoModule: repo, prismaModule: db } = await loadPrismaRepo();
-      candidateRepo = new repo.PrismaCandidateRepository(db.prisma);
+      const repo = await loadFirestoreRepo();
+      candidateRepo = new repo.FirestoreCandidateRepository();
     }
   }
   return candidateRepo;
@@ -70,21 +74,25 @@ export async function getQuestionRepository(): Promise<IQuestionRepository> {
       const mod = await loadDemoRepo();
       questionRepo = new mod.DemoQuestionRepository();
     } else {
-      const { prismaRepoModule: repo, prismaModule: db } = await loadPrismaRepo();
-      questionRepo = new repo.PrismaQuestionRepository(db.prisma);
+      const repo = await loadFirestoreRepo();
+      questionRepo = new repo.FirestoreQuestionRepository();
     }
   }
   return questionRepo;
 }
 
 export async function getAiService(): Promise<IAiService> {
-  if (!aiService) {
-    const mod = await loadAiService();
-    if (isDemoMode()) {
-      aiService = new mod.DemoAiService();
-    } else {
-      aiService = new mod.GeminiAiService();
-    }
+  if (aiService) {
+    return aiService;
   }
+
+  if (isDemoMode()) {
+    const mod = await loadDemoAiService();
+    aiService = new mod.DemoAiService();
+    return aiService;
+  }
+
+  const mod = await loadGoAiService();
+  aiService = new mod.GoAiService();
   return aiService;
 }

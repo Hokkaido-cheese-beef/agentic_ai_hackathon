@@ -15,4 +15,31 @@ describe("Tag", () => {
     const tag = container.firstChild as HTMLElement;
     expect(tag.style.backgroundColor).toBe("rgb(239, 246, 255)");
   });
+
+  it("色未指定時はラベルから自動配色される", () => {
+    const { container: container1 } = render(<Tag label="予算" icon="wallet" />);
+    const tag1 = container1.firstChild as HTMLElement;
+
+    const { container: container2 } = render(<Tag label="時間" icon="clock" />);
+    const tag2 = container2.firstChild as HTMLElement;
+
+    // 自動配色が適用されること
+    expect(tag1.style.backgroundColor).toBeTruthy();
+    expect(tag1.style.color).toBeTruthy();
+    expect(tag2.style.backgroundColor).toBeTruthy();
+    expect(tag2.style.color).toBeTruthy();
+  });
+
+  it("異なるラベルに異なる配色が適用される可能性がある", () => {
+    const { container: container1 } = render(<Tag label="A" icon="wallet" />);
+    const tag1 = container1.firstChild as HTMLElement;
+
+    const { container: container2 } = render(<Tag label="B" icon="wallet" />);
+    const tag2 = container2.firstChild as HTMLElement;
+
+    // 異なるラベルで異なる色が適用される可能性を確認
+    // （ハッシュ衝突の可能性もあるので、存在チェックのみ）
+    expect(tag1.style.backgroundColor).toBeTruthy();
+    expect(tag2.style.backgroundColor).toBeTruthy();
+  });
 });

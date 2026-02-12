@@ -100,8 +100,8 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Extract Docker metadata
-        id: meta
+      - name: Extract Docker metadata (app)
+        id: meta-app
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/${{ secrets.GAR_IMAGE }}
@@ -109,11 +109,29 @@ jobs:
             type=raw,value=sha-${{ env.COMMIT_SHA }}
             type=raw,value=latest
 
-      - name: Build and push
+      - name: Build and push (app)
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.meta-app.outputs.tags }}
+          labels: ${{ steps.meta-app.outputs.labels }}
+
+      - name: Extract Docker metadata (ai)
+        id: meta-ai
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ secrets.GAR_LOCATION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.GAR_REPOSITORY }}/${{ secrets.GAR_AI_IMAGE || format('{0}-ai', secrets.GAR_IMAGE) }}
+          tags: |
+            type=raw,value=sha-${{ env.COMMIT_SHA }}
+            type=raw,value=latest
+
+      - name: Build and push (ai)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai
+          file: ./ai/Dockerfile
+          push: true
+          tags: ${{ steps.meta-ai.outputs.tags }}
+          labels: ${{ steps.meta-ai.outputs.labels }}

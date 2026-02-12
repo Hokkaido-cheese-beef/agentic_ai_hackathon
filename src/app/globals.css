@@ -18,6 +18,11 @@
   --rating: #FCD34D;
   --shadow-primary: #3B82F650;
   --shadow-dark: #0000002A;
+
+  /* Tag Colors */
+  --tag-color-1: #3B82F6;
+  --tag-color-2: #10B981;
+  --tag-color-3: #F59E0B;
 }
 
 @theme inline {
@@ -39,8 +44,15 @@
   --font-sans: var(--font-ibm-plex-sans);
 }
 
+/* Card Border Radius Tokens */
+:root {
+  --card-radius-default: 20px;
+  --card-radius-inner: 16px;
+  --card-radius-small: 12px;
+}
+
 body {
-  background: var(--background);
+  background: #E2E8F0;
   color: var(--foreground);
   font-family: var(--font-sans), "IBM Plex Sans", sans-serif;
   -webkit-font-smoothing: antialiased;

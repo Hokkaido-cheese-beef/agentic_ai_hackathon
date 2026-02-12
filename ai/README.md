@@ -21,26 +21,21 @@ Gemini を使って旅行プランを生成する Go API サーバー。
 - Google Cloud 認証 (以下いずれか)
   - **Vertex AI**: `gcloud auth application-default login` を実行済み
   - **Gemini API**: `GOOGLE_API_KEY` を設定
+  - `.env` が作成&設定済み
 
 ### Vertex AI で実行
 
 ```bash
-cd ai
-
 # ADC を設定 (初回のみ)
 gcloud auth application-default login
 
 # 環境変数を設定して起動
-export GOOGLE_GENAI_USE_VERTEXAI=True
-export GOOGLE_CLOUD_PROJECT=<your-project-id>
-export GOOGLE_CLOUD_LOCATION=global
 go run .
 ```
 
 ### テスト
 
 ```bash
-cd ai
 go test ./...
 ```
 

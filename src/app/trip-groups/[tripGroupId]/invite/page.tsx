@@ -1,44 +1,49 @@
-"use client";
-
-import { useMemo, useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import CopyableField from "@/components/copyable-field";
-import { demoGetTripGroup } from "@/lib/demo/demo-client-service";
+import { getTripGroupRepository } from "@/lib/container";
+import { DemoInvitePage } from "@/components/demo/DemoInvitePage";
 
-type DemoInvitePageProps = {
-  tripGroupId: string;
+type InvitePageProps = {
+  params: Promise<{
+    tripGroupId: string;
+  }>;
 };
 
-function subscribeNoop() {
-  return () => {};
-}
+export default async function InvitePage({ params }: InvitePageProps) {
+  const { tripGroupId } = await params;
 
-function getOrigin() {
-  return window.location.origin;
-}
-
-function getOriginServer() {
-  return "http://localhost:3000";
-}
-
-/**
- * デモモード用招待ページ（クライアントコンポーネント）
- * クライアント側 demoStore からグループ情報を取得して描画
- */
-export function DemoInvitePage({ tripGroupId }: DemoInvitePageProps) {
-  const group = useMemo(() => demoGetTripGroup(tripGroupId), [tripGroupId]);
-
-  if (!group) {
+  if (!tripGroupId) {
     notFound();
   }
 
-  const origin = useSyncExternalStore(subscribeNoop, getOrigin, getOriginServer);
-  const inviteUrl = `${origin}/trip-groups/${tripGroupId}`;
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(inviteUrl)}`;
+  // デモモード: クライアント側 demoStore を参照するコンポーネントを描画
+  if (process.env.NEXT_PUBLIC_DEMO_MODE === "true") {
+    return <DemoInvitePage tripGroupId={tripGroupId} />;
+  }
+
+  const tripGroup = await (await getTripGroupRepository()).findById(tripGroupId);
+
+  if (!tripGroup) {
+    notFound();
+  }
+
+  const headerList = await headers();
+  const host =
+    headerList.get("x-forwarded-host") ??
+    headerList.get("host") ??
+    "localhost:3000";
+  const protocolHeader = headerList.get("x-forwarded-proto");
+  const protocol =
+    protocolHeader ?? (host.includes("localhost") ? "http" : "https");
+  const inviteUrl = `${protocol}://${host}/trip-groups/${tripGroupId}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(
+    inviteUrl
+  )}`;
 
   return (
     <main className="mx-auto min-h-screen max-w-[430px] bg-surface shadow-lg">
@@ -61,7 +66,7 @@ export function DemoInvitePage({ tripGroupId }: DemoInvitePageProps) {
             グループ名
           </span>
           <span className="text-lg font-bold text-foreground">
-            {group.name}
+            {tripGroup.name}
           </span>
         </div>
 

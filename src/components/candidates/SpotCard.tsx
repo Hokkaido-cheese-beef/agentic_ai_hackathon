@@ -10,7 +10,7 @@ type SpotCardProps = {
 
 export function SpotCard({ candidate }: SpotCardProps) {
   return (
-    <div className="overflow-hidden rounded-[20px] bg-white border border-border shadow-[0_4px_20px_#0000000D]">
+    <div className="overflow-hidden [border-radius:var(--card-radius-default)] bg-white border border-border shadow-[0_4px_20px_#0000000D]">
       {/* Photo Area */}
       <div className="relative h-[200px] overflow-hidden">
         {candidate.image_url ? (
@@ -66,7 +66,7 @@ export function SpotCard({ candidate }: SpotCardProps) {
 
         {/* Info */}
         {candidate.info && (
-          <div className="flex flex-col gap-1.5 rounded-xl bg-surface p-3">
+          <div className="flex flex-col gap-1.5 [border-radius:var(--card-radius-inner)] bg-surface p-3">
             <div className="flex items-center gap-1.5">
               <Info className="h-3.5 w-3.5 text-text-secondary" />
               <span className="text-xs font-semibold text-text-secondary">基本情報</span>

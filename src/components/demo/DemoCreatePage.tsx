@@ -24,7 +24,7 @@ export function DemoCreatePage() {
 
     demoCreateTripGroup(trimmedName)
       .then((group) => {
-        router.push(`/trip-groups/${group.trip_group_id}`);
+        router.push(`/trip-groups/${group.trip_group_id}/invite`);
       })
       .catch((err) => {
         setError(
@@ -37,7 +37,7 @@ export function DemoCreatePage() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-8 bg-white px-4 text-center">
+    <main className="mx-auto flex min-h-screen max-w-[430px] flex-col items-center justify-center gap-8 bg-white px-4 text-center shadow-lg">
       <div>
         <p className="text-sm text-zinc-500">グループ管理</p>
         <h1 className="text-3xl font-semibold text-zinc-900">新しいグループを作成</h1>

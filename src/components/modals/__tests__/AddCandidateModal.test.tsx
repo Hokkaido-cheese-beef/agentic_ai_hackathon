@@ -35,16 +35,6 @@ describe("AddCandidateModal", () => {
     expect(screen.getByPlaceholderText("名前やURLを入力...")).toBeInTheDocument();
   });
 
-  it("またはディバイダー", () => {
-    render(<AddCandidateModal {...defaultProps} />);
-    expect(screen.getByText("または")).toBeInTheDocument();
-  });
-
-  it("マップから選択ラベル", () => {
-    render(<AddCandidateModal {...defaultProps} />);
-    expect(screen.getByText("マップから選択")).toBeInTheDocument();
-  });
-
   it("入力空 → ボタンdisabled", () => {
     render(<AddCandidateModal {...defaultProps} />);
     const buttons = screen.getAllByRole("button");

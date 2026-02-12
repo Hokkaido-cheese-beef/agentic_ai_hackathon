@@ -26,6 +26,33 @@ export class GoAiService implements IAiService {
     this.timeout = Number(process.env.GO_AI_TIMEOUT_MS || "30000");
   }
 
+  private isLocalAiEndpoint(): boolean {
+    try {
+      const url = new URL(this.baseUrl);
+      return ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(url.hostname);
+    } catch {
+      return false;
+    }
+  }
+
+  private async getCloudRunIdToken(audience: string): Promise<string> {
+    const token = process.env.GO_AI_ID_TOKEN;
+    if (token) return token;
+
+    const metadataUrl =
+      `http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity` +
+      `?audience=${encodeURIComponent(audience)}&format=full`;
+    const response = await fetch(metadataUrl, {
+      headers: { "Metadata-Flavor": "Google" },
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get Cloud Run ID token: ${response.status}`);
+    }
+
+    return await response.text();
+  }
+
   async summarize(candidateName: string, sourceUrl?: string | null, origin?: string | null): Promise<AiSummaryResult> {
     const request: GoAiPlanRequest = {
       origin: origin || "日本",
@@ -111,9 +138,15 @@ export class GoAiService implements IAiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (!this.isLocalAiEndpoint()) {
+        const audience = new URL(this.baseUrl).origin;
+        headers.Authorization = `Bearer ${await this.getCloudRunIdToken(audience)}`;
+      }
+
       const response = await fetch(`${this.baseUrl}/plan`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify(request),
         signal: controller.signal,
       });

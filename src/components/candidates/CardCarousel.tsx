@@ -81,7 +81,7 @@ export function CardCarousel({ candidates, activeIndex }: Props) {
     anim.direction === "left" ? [prev, current] : [current, prev];
 
   return (
-    <div className="overflow-hidden">
+    <div className="overflow-hidden [border-radius:var(--card-radius-default)]">
       <div ref={trackRef} className="flex" style={{ width: "200%" }}>
         {cards.map((c, i) => (
           <div key={i} className="w-1/2 flex-shrink-0">

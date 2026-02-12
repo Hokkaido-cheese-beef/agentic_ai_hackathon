@@ -17,29 +17,18 @@ vi.mock("firebase/firestore", () => ({
 
 describe("useCandidatesRealtime", () => {
   const tripGroupId = "test-group-id";
-  const sessionId = "test-session-id";
 
   beforeEach(() => {
     vi.clearAllMocks();
-    // localStorage のモック
-    Object.defineProperty(window, "localStorage", {
-      value: {
-        getItem: vi.fn(() => sessionId),
-        setItem: vi.fn(),
-        removeItem: vi.fn(),
-        clear: vi.fn(),
-      },
-      writable: true,
-    });
   });
 
-  it("自分が作成した候補のみフィルタリングする", async () => {
+  it("同じグループの候補をすべて返す", async () => {
     const mockCandidates = [
       {
         id: "candidate-1",
         name: "自分の候補",
         trip_group_id: tripGroupId,
-        createdBy: sessionId,
+        createdBy: "test-session-id",
         tags: [],
         ai_summary: null,
       },
@@ -70,19 +59,20 @@ describe("useCandidatesRealtime", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    // 自分の候補のみが含まれることを確認
-    expect(result.current.candidates).toHaveLength(1);
+    expect(result.current.candidates).toHaveLength(2);
     expect(result.current.candidates[0]?.id).toBe("candidate-1");
     expect(result.current.candidates[0]?.name).toBe("自分の候補");
+    expect(result.current.candidates[1]?.id).toBe("candidate-2");
+    expect(result.current.candidates[1]?.name).toBe("他人の候補");
   });
 
-  it("createdBy がない候補は除外される", async () => {
+  it("createdBy がない候補も返す", async () => {
     const mockCandidates = [
       {
         id: "candidate-1",
         name: "自分の候補",
         trip_group_id: tripGroupId,
-        createdBy: sessionId,
+        createdBy: "test-session-id",
         tags: [],
         ai_summary: null,
       },
@@ -112,11 +102,11 @@ describe("useCandidatesRealtime", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.candidates).toHaveLength(1);
-    expect(result.current.candidates[0]?.id).toBe("candidate-1");
+    expect(result.current.candidates).toHaveLength(2);
+    expect(result.current.candidates[1]?.id).toBe("candidate-2");
   });
 
-  it("該当する候補がない場合は空配列を返す", async () => {
+  it("他人の候補のみでも返す", async () => {
     const mockCandidates: TripCandidate[] = [
       {
         id: "candidate-1",
@@ -151,7 +141,8 @@ describe("useCandidatesRealtime", () => {
       expect(result.current.isLoading).toBe(false);
     });
 
-    expect(result.current.candidates).toHaveLength(0);
+    expect(result.current.candidates).toHaveLength(1);
+    expect(result.current.candidates[0]?.id).toBe("candidate-1");
   });
 
   it("エラー発生時は isLoading が false になる", async () => {

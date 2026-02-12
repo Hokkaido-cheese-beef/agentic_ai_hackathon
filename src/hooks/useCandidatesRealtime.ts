@@ -25,7 +25,8 @@ export function useCandidatesRealtime(tripGroupId: string) {
         setCandidates(allCandidates);
         setIsLoading(false);
       },
-      () => {
+      (error) => {
+        console.error("Failed to subscribe candidates", error);
         setIsLoading(false);
       }
     );

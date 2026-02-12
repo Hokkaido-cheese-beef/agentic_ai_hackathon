@@ -261,4 +261,22 @@ export class FirestoreQuestionRepository implements IQuestionRepository {
     const snap = await withRetry(() => docRef.get(), { label: "getQuestionAfterUpdate" });
     return toQuestionDomain(tripGroupId, questionId, (snap.data() ?? {}) as Record<string, unknown>);
   }
+
+  async findGlobalByGroupId(tripGroupId: string): Promise<Question[]> {
+    const snap = await withRetry(
+      () =>
+        adminDb
+          .collection("tripGroups")
+          .doc(tripGroupId)
+          .collection("questions")
+          .where("candidate_id", "==", null)
+          .orderBy("created_at", "asc")
+          .get(),
+      { label: "findGlobalQuestions" }
+    );
+
+    return snap.docs.map((doc) =>
+      toQuestionDomain(tripGroupId, doc.id, (doc.data() ?? {}) as Record<string, unknown>)
+    );
+  }
 }

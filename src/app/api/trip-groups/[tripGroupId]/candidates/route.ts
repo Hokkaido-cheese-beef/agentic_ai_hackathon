@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getTripGroupRepository, getCandidateRepository } from "@/lib/container";
+import { getTripGroupRepository, getCandidateRepository, getQuestionRepository, getAiService } from "@/lib/container";
 import { createCandidateSchema } from "@/lib/validators";
 
 export async function GET(
@@ -54,6 +54,37 @@ export async function POST(
       tripGroupId,
       createdBy,
     });
+
+    // 全体質問のAI回答を新候補に対して生成（fire-and-forget）
+    (async () => {
+      try {
+        const [questionRepo, aiSvc, candRepo] = await Promise.all([
+          getQuestionRepository(),
+          getAiService(),
+          getCandidateRepository(),
+        ]);
+        const globalQuestions = await questionRepo.findGlobalByGroupId(tripGroupId);
+
+        for (const q of globalQuestions) {
+          try {
+            const result = aiSvc.streamAnswer(q.content, candidate.name);
+            const text = await result.fullText;
+
+            const c = await candRepo.findById(tripGroupId, candidate.id);
+            if (c) {
+              const current = c.ai_summary ?? { headline: "", qa: [] };
+              await candRepo.update(candidate.id, tripGroupId, {
+                ai_summary: { ...current, qa: [...current.qa, { q: q.content, a: text }] },
+              });
+            }
+          } catch (e) {
+            console.error(`Failed to generate answer for question ${q.id}:`, e);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to process global questions for new candidate:", e);
+      }
+    })();
 
     return NextResponse.json({ candidate }, { status: 201 });
   } catch (error) {

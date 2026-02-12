@@ -80,6 +80,12 @@ class DemoStore {
   getQuestion(id: string): Question | undefined {
     return this.questions.get(id);
   }
+
+  getQuestionsByGroup(tripGroupId: string): Question[] {
+    return Array.from(this.questions.values())
+      .filter((q) => q.trip_group_id === tripGroupId)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at));
+  }
 }
 
 // globalThis でシングルトン永続化（チャンク境界を超えてインスタンスを維持）

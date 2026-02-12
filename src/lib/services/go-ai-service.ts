@@ -57,7 +57,10 @@ export class GoAiService implements IAiService {
     const request: GoAiPlanRequest = {
       origin: origin || "日本",
       destination: candidateName,
-      questions: [],
+      questions: [
+        `${candidateName}の営業時間、料金、アクセスなどの実用的な基本情報を教えてください`,
+        `${candidateName}の最大の魅力や特徴を1文で教えてください`,
+      ],
     };
 
     // /plan と /image を並行して呼び出す
@@ -67,6 +70,7 @@ export class GoAiService implements IAiService {
     ]);
 
     // Go の /plan レスポンスを AiSummaryResult に変換
+    // description → 概要説明, survey[0] → 実用情報(info), survey[1] → 魅力ハイライト(headline)
     return {
       description: response.description || "",
       rating: 4.0, // デフォルト値（/plan では rating なし）
@@ -87,10 +91,10 @@ export class GoAiService implements IAiService {
           bgColor: "#FFFBEB",
         },
       ],
-      info: response.description || "",
+      info: response.survey?.[0]?.answer || "",
       aiSummary: {
-        headline: response.description || "",
-        qa: response.survey ? response.survey.map((s) => ({ q: s.question, a: s.answer })) : [],
+        headline: response.survey?.[1]?.answer || "",
+        qa: [],
       },
       imageUrl,
     };

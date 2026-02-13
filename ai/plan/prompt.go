@@ -43,9 +43,9 @@ func BuildPlanPrompt(origin, destination string, questions []string) string {
 
 	var jsonKeyNote string
 	if hasQuestions {
-		jsonKeyNote = "JSONキーは、tag、budget_jpy、travel_time、description、survey、question、answerのみを使用してください。"
+		jsonKeyNote = "JSONキーは、tag、budget_jpy、travel_time、info、description、survey、question、answerのみを使用してください。"
 	} else {
-		jsonKeyNote = "JSONキーは、tag、budget_jpy、travel_time、descriptionのみを使用してください。survey、question、answerキーは含めないでください。"
+		jsonKeyNote = "JSONキーは、tag、budget_jpy、travel_time、info、descriptionのみを使用してください。survey、question、answerキーは含めないでください。"
 	}
 
 	return fmt.Sprintf(`あなたは熟練の旅行サポーターです。
@@ -59,6 +59,7 @@ func BuildPlanPrompt(origin, destination string, questions []string) string {
         "budget_jpy": 1000,
         "travel_time": "車1時間"
     },
+	"info": "目的地の詳細な説明を2-3文200文字程度（目的地名は含めない）"
     "description": "魅力的な紹介文（100文字程度）"%s
 }
 

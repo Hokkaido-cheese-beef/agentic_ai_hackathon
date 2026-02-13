@@ -22,6 +22,7 @@ type SurveyItem struct {
 // TravelPlan はAIが生成する旅行プランのレスポンス
 type TravelPlan struct {
 	Tag         TravelTag    `json:"tag"`
+	Info        string       `json:"info"`
 	Description string       `json:"description"`
 	Survey      []SurveyItem `json:"survey"`
 	Image       string       `json:"image"`

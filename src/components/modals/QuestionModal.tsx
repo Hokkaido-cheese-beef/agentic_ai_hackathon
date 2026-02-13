@@ -75,7 +75,7 @@ export function QuestionModal({
             value={questionText}
             onChange={(e) => setQuestionText(e.target.value)}
             placeholder="例: 入場料はいくらですか？"
-            className="h-20 resize-none rounded-xl bg-surface border border-border p-3.5 text-sm text-foreground placeholder:text-text-muted outline-none"
+            className="h-20 resize-none rounded-xl bg-surface border border-border p-3.5 text-base text-foreground placeholder:text-text-muted outline-none"
           />
         </div>
 

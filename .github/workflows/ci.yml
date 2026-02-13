@@ -81,9 +81,9 @@ jobs:
       contents: read
       id-token: write
     outputs:
-      commit_sha: ${{ steps.meta.outputs.commit_sha }}
-      app_image_url: ${{ steps.meta.outputs.app_image_url }}
-      ai_image_url: ${{ steps.meta.outputs.ai_image_url }}
+      commit_sha: ${{ steps.image-meta.outputs.commit_sha }}
+      app_image_url: ${{ steps.image-meta.outputs.app_image_url }}
+      ai_image_url: ${{ steps.image-meta.outputs.ai_image_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,7 +93,7 @@ jobs:
         run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Compute image URLs
-        id: meta
+        id: image-meta
         env:
           GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -189,8 +189,12 @@ jobs:
         env:
           RUN_REGION: ${{ secrets.CLOUD_RUN_REGION || secrets.GAR_LOCATION }}
           AI_SERVICE: ${{ secrets.CLOUD_RUN_AI_SERVICE || format('{0}-ai', secrets.GAR_IMAGE) }}
-          AI_IMAGE_URL: ${{ needs.build-and-push.outputs.ai_image_url }}
+          AI_IMAGE_URL: ${{ needs['build-and-push'].outputs.ai_image_url }}
         run: |
+          if [ -z "$AI_IMAGE_URL" ]; then
+            echo "AI_IMAGE_URL is empty"
+            exit 1
+          fi
           gcloud run services update "$AI_SERVICE" \
             --region "$RUN_REGION" \
             --image "$AI_IMAGE_URL"
@@ -199,14 +203,18 @@ jobs:
         env:
           RUN_REGION: ${{ secrets.CLOUD_RUN_REGION || secrets.GAR_LOCATION }}
           APP_SERVICE: ${{ secrets.CLOUD_RUN_APP_SERVICE || secrets.GAR_IMAGE }}
-          APP_IMAGE_URL: ${{ needs.build-and-push.outputs.app_image_url }}
+          APP_IMAGE_URL: ${{ needs['build-and-push'].outputs.app_image_url }}
         run: |
+          if [ -z "$APP_IMAGE_URL" ]; then
+            echo "APP_IMAGE_URL is empty"
+            exit 1
+          fi
           gcloud run services update "$APP_SERVICE" \
             --region "$RUN_REGION" \
             --image "$APP_IMAGE_URL"
 
       - name: Deployment summary
         run: |
-          echo "commit_sha=${{ needs.build-and-push.outputs.commit_sha }}"
-          echo "app_image_url=${{ needs.build-and-push.outputs.app_image_url }}"
-          echo "ai_image_url=${{ needs.build-and-push.outputs.ai_image_url }}"
+          echo "commit_sha=${{ needs['build-and-push'].outputs.commit_sha }}"
+          echo "app_image_url=${{ needs['build-and-push'].outputs.app_image_url }}"
+          echo "ai_image_url=${{ needs['build-and-push'].outputs.ai_image_url }}"

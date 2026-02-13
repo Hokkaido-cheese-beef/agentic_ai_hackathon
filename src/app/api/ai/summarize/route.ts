@@ -25,6 +25,7 @@ export async function POST(request: Request) {
       tags: result.tags || [],
       info: result.info || null,
       ai_summary: result.aiSummary || null,
+      image_url: result.imageUrl || null,
     });
 
     return NextResponse.json({ candidate });

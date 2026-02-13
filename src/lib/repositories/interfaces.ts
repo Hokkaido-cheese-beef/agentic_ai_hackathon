@@ -12,6 +12,7 @@ export interface CandidateUpdateData {
   tags: CandidateTag[];
   info: string | null;
   ai_summary: AiSummary | null;
+  image_url: string | null;
 }
 
 export interface ITripGroupRepository {

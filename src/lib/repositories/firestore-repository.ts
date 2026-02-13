@@ -270,13 +270,14 @@ export class FirestoreQuestionRepository implements IQuestionRepository {
           .doc(tripGroupId)
           .collection("questions")
           .where("candidate_id", "==", null)
-          .orderBy("created_at", "asc")
           .get(),
       { label: "findGlobalQuestions" }
     );
 
-    return snap.docs.map((doc) =>
-      toQuestionDomain(tripGroupId, doc.id, (doc.data() ?? {}) as Record<string, unknown>)
-    );
+    return snap.docs
+      .map((doc) =>
+        toQuestionDomain(tripGroupId, doc.id, (doc.data() ?? {}) as Record<string, unknown>)
+      )
+      .sort((a, b) => a.created_at.localeCompare(b.created_at));
   }
 }

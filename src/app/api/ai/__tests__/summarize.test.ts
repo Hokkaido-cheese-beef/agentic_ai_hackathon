@@ -4,12 +4,14 @@ import { POST } from "../summarize/route";
 // Mock container
 const mockSummarize = vi.fn();
 const mockCandidateUpdate = vi.fn();
+const mockCandidateFindById = vi.fn();
 vi.mock("@/lib/container", () => ({
   getAiService: async () => ({
     summarize: mockSummarize,
   }),
   getCandidateRepository: async () => ({
     update: mockCandidateUpdate,
+    findById: mockCandidateFindById,
   }),
 }));
 
@@ -44,6 +46,13 @@ describe("POST /api/ai/summarize", () => {
     };
 
     mockSummarize.mockResolvedValueOnce(aiResult);
+    // findById: 既存候補（ai_summary に既存 qa がある場合のマージテスト）
+    mockCandidateFindById.mockResolvedValueOnce({
+      id: validBody.candidate_id,
+      trip_group_id: validBody.trip_group_id,
+      name: "美ら海水族館",
+      ai_summary: null,
+    });
     mockCandidateUpdate.mockResolvedValueOnce({
       id: validBody.candidate_id,
       trip_group_id: validBody.trip_group_id,

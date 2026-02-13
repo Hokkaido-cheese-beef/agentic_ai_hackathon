@@ -57,8 +57,6 @@ describe("POST /api/ai/summarize", () => {
       name: "美ら海水族館",
       description: "沖縄を代表する水族館",
       image_url: null,
-      rating: null,
-      review_count: null,
       tags: aiResult.tags,
       info: "詳細情報",
       ai_summary: aiResult.aiSummary,

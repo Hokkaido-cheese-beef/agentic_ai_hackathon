@@ -15,7 +15,6 @@
   --surface-raised: #F1F5F9;
   --border: #E2E8F0;
   --border-medium: #CBD5E1;
-  --rating: #FCD34D;
   --shadow-primary: #3B82F650;
   --shadow-dark: #0000002A;
 
@@ -40,7 +39,6 @@
   --color-surface-raised: var(--surface-raised);
   --color-border: var(--border);
   --color-border-medium: var(--border-medium);
-  --color-rating: var(--rating);
   --font-sans: var(--font-ibm-plex-sans);
 }
 

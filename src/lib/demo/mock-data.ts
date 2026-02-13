@@ -21,8 +21,6 @@ export const demoCandidates: TripCandidate[] = [
     name: "金閣寺",
     description: "世界文化遺産に登録された京都を代表する禅寺",
     image_url: null,
-    rating: 4.5,
-    review_count: 12840,
     tags: [
       { icon: "Landmark", label: "世界遺産", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" },
       { icon: "Clock", label: "所要1-2時間", textColor: "#D97706", iconColor: "#F59E0B", bgColor: "#FFFBEB" },
@@ -46,8 +44,6 @@ export const demoCandidates: TripCandidate[] = [
     name: "美ら海水族館",
     description: "世界最大級の水槽を誇る沖縄の人気スポット",
     image_url: null,
-    rating: 4.7,
-    review_count: 28500,
     tags: [
       { icon: "Fish", label: "水族館", textColor: "#0891B2", iconColor: "#06B6D4", bgColor: "#ECFEFF" },
       { icon: "Baby", label: "子連れ◎", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" },
@@ -71,8 +67,6 @@ export const demoCandidates: TripCandidate[] = [
     name: "道頓堀",
     description: "グルメとエンターテインメントが集まる大阪の繁華街",
     image_url: null,
-    rating: 4.3,
-    review_count: 18200,
     tags: [
       { icon: "Utensils", label: "グルメ", textColor: "#DC2626", iconColor: "#EF4444", bgColor: "#FEF2F2" },
       { icon: "Camera", label: "フォトスポット", textColor: "#7C3AED", iconColor: "#8B5CF6", bgColor: "#F5F3FF" },

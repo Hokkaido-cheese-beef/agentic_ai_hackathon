@@ -36,8 +36,6 @@ vi.mock("firebase/firestore", () => ({
             name: "美ら海水族館",
             description: "世界最大級のジンベエザメ",
             image_url: null,
-            rating: 4.8,
-            review_count: 128,
             tags: [
               { icon: "wallet", label: "¥2,000", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" },
             ],
@@ -51,8 +49,6 @@ vi.mock("firebase/firestore", () => ({
             name: "首里城",
             description: "世界遺産",
             image_url: null,
-            rating: 4.5,
-            review_count: 90,
             tags: [],
             info: null,
             ai_summary: null,

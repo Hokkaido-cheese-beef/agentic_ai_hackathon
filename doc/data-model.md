@@ -8,7 +8,7 @@ tripGroups (collection)
     ├── candidates (subcollection)
     │   └── {candidateId}
     │       ├── name, source_url?
-    │       ├── description?, image_url?, rating?, review_count?
+    │       ├── description?, image_url?
     │       ├── tags, info?, ai_summary?
     │       └── created_at, updated_at
     └── questions (subcollection)

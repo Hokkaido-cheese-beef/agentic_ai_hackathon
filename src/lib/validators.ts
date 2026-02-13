@@ -53,8 +53,6 @@ const aiQaSchema = z.object({
 
 export const aiSummaryResponseSchema = z.object({
   description: z.string().optional(),
-  rating: z.number().min(0).max(5).optional(),
-  review_count: z.number().int().min(0).optional(),
   tags: z.array(aiTagSchema).optional(),
   info: z.string().optional(),
   ai_summary: z

@@ -2,7 +2,8 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       commit_sha:
@@ -81,9 +82,9 @@ jobs:
       contents: read
       id-token: write
     outputs:
-      commit_sha: ${{ steps.image-meta.outputs.commit_sha }}
-      app_image_url: ${{ steps.image-meta.outputs.app_image_url }}
-      ai_image_url: ${{ steps.image-meta.outputs.ai_image_url }}
+      commit_sha: ${{ steps.image_meta.outputs.commit_sha }}
+      app_image_url: ${{ steps.image_meta.outputs.app_image_url }}
+      ai_image_url: ${{ steps.image_meta.outputs.ai_image_url }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,7 +94,7 @@ jobs:
         run: echo "COMMIT_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Compute image URLs
-        id: image-meta
+        id: image_meta
         env:
           GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
           GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
@@ -107,6 +108,12 @@ jobs:
           echo "commit_sha=${COMMIT_SHA}" >> "$GITHUB_OUTPUT"
           echo "app_image_url=${APP_IMAGE_URL}" >> "$GITHUB_OUTPUT"
           echo "ai_image_url=${AI_IMAGE_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Debug image outputs
+        run: |
+          echo "commit_sha=${{ steps.image_meta.outputs.commit_sha }}"
+          echo "app_image_url=${{ steps.image_meta.outputs.app_image_url }}"
+          echo "ai_image_url=${{ steps.image_meta.outputs.ai_image_url }}"
 
       - name: Auth to Google Cloud (Workload Identity Federation)
         uses: google-github-actions/auth@v2
@@ -185,11 +192,36 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
+      - name: Compute deploy image URLs
+        env:
+          GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+          GAR_REPOSITORY: ${{ secrets.GAR_REPOSITORY }}
+          GAR_IMAGE: ${{ secrets.GAR_IMAGE }}
+          GAR_AI_IMAGE: ${{ secrets.GAR_AI_IMAGE }}
+          BUILD_COMMIT_SHA: ${{ needs['build-and-push'].outputs.commit_sha }}
+          INPUT_COMMIT_SHA: ${{ github.event.inputs.commit_sha }}
+        run: |
+          COMMIT_SHA="${BUILD_COMMIT_SHA}"
+          if [ -z "$COMMIT_SHA" ]; then
+            COMMIT_SHA="${INPUT_COMMIT_SHA:-${GITHUB_SHA}}"
+          fi
+          AI_IMAGE_NAME="${GAR_AI_IMAGE:-${GAR_IMAGE}-ai}"
+          APP_IMAGE_URL="${GAR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${GAR_IMAGE}:sha-${COMMIT_SHA}"
+          AI_IMAGE_URL="${GAR_LOCATION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GAR_REPOSITORY}/${AI_IMAGE_NAME}:sha-${COMMIT_SHA}"
+
+          echo "COMMIT_SHA=${COMMIT_SHA}" >> "$GITHUB_ENV"
+          echo "APP_IMAGE_URL=${APP_IMAGE_URL}" >> "$GITHUB_ENV"
+          echo "AI_IMAGE_URL=${AI_IMAGE_URL}" >> "$GITHUB_ENV"
+
+          echo "commit_sha=${COMMIT_SHA}"
+          echo "app_image_url=${APP_IMAGE_URL}"
+          echo "ai_image_url=${AI_IMAGE_URL}"
+
       - name: Deploy ai service
         env:
           RUN_REGION: ${{ secrets.CLOUD_RUN_REGION || secrets.GAR_LOCATION }}
           AI_SERVICE: ${{ secrets.CLOUD_RUN_AI_SERVICE || format('{0}-ai', secrets.GAR_IMAGE) }}
-          AI_IMAGE_URL: ${{ needs['build-and-push'].outputs.ai_image_url }}
         run: |
           if [ -z "$AI_IMAGE_URL" ]; then
             echo "AI_IMAGE_URL is empty"
@@ -203,7 +235,6 @@ jobs:
         env:
           RUN_REGION: ${{ secrets.CLOUD_RUN_REGION || secrets.GAR_LOCATION }}
           APP_SERVICE: ${{ secrets.CLOUD_RUN_APP_SERVICE || secrets.GAR_IMAGE }}
-          APP_IMAGE_URL: ${{ needs['build-and-push'].outputs.app_image_url }}
         run: |
           if [ -z "$APP_IMAGE_URL" ]; then
             echo "APP_IMAGE_URL is empty"
@@ -215,6 +246,6 @@ jobs:
 
       - name: Deployment summary
         run: |
-          echo "commit_sha=${{ needs['build-and-push'].outputs.commit_sha }}"
-          echo "app_image_url=${{ needs['build-and-push'].outputs.app_image_url }}"
-          echo "ai_image_url=${{ needs['build-and-push'].outputs.ai_image_url }}"
+          echo "commit_sha=${COMMIT_SHA}"
+          echo "app_image_url=${APP_IMAGE_URL}"
+          echo "ai_image_url=${AI_IMAGE_URL}"

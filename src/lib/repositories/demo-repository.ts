@@ -101,4 +101,9 @@ export class DemoQuestionRepository implements IQuestionRepository {
     demoStore.updateQuestion(questionId, { ai_answer: data.aiAnswer });
     return demoStore.getQuestion(questionId) as Question;
   }
+
+  async findGlobalByGroupId(tripGroupId: string): Promise<Question[]> {
+    ensureSeeded();
+    return demoStore.getQuestionsByGroup(tripGroupId).filter((q) => q.candidate_id === null);
+  }
 }

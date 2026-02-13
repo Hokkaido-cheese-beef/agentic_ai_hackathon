@@ -30,4 +30,5 @@ export interface ICandidateRepository {
 export interface IQuestionRepository {
   create(data: { content: string; candidateId?: string | null; tripGroupId: string }): Promise<Question>;
   update(questionId: string, tripGroupId: string, data: { aiAnswer: string }): Promise<Question>;
+  findGlobalByGroupId(tripGroupId: string): Promise<Question[]>;
 }

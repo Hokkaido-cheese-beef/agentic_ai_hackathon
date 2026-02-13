@@ -23,18 +23,6 @@ export function SpotCard({ candidate }: SpotCardProps) {
         ) : (
           <div className="h-full w-full bg-gradient-to-br from-primary to-[#60A5FA]" />
         )}
-        {candidate.rating != null && (
-          <div className="absolute right-3 top-3 flex items-center gap-1 rounded-lg bg-black/40 px-2.5 py-1">
-            <span className="text-sm font-bold text-rating">
-              ★ {candidate.rating}
-            </span>
-            {candidate.review_count != null && (
-              <span className="text-[11px] text-white">
-                ({candidate.review_count})
-              </span>
-            )}
-          </div>
-        )}
         <div className="absolute bottom-0 left-0 right-0 h-[60px] bg-gradient-to-t from-white to-transparent" />
       </div>
 

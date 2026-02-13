@@ -4,8 +4,6 @@
 
 interface MockSummary {
   description: string;
-  rating: number;
-  review_count: number;
   tags: { icon: string; label: string; textColor: string; iconColor: string; bgColor: string }[];
   info: string;
   ai_summary: { headline: string; qa: { q: string; a: string }[] };
@@ -17,8 +15,6 @@ export async function mockSummarize(_candidateName: string): Promise<MockSummary
   await new Promise((r) => setTimeout(r, 500));
   return {
     description: "日本で人気の観光スポットです",
-    rating: 4.2,
-    review_count: 5800,
     tags: [
       { icon: "MapPin", label: "観光地", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" },
       { icon: "Clock", label: "所要2-3時間", textColor: "#D97706", iconColor: "#F59E0B", bgColor: "#FFFBEB" },

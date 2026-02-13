@@ -26,6 +26,11 @@ export class DemoAiService implements IAiService {
     };
   }
 
+  async fetchImage(query: string): Promise<string | null> {
+    void query;
+    return null;
+  }
+
   streamAnswer(question: string, candidateName: string | null): AiStreamResult {
     const answer = candidateName
       ? `「${candidateName}」についてのご質問ですね。\n\n${question}に関してお答えします。\n\n${candidateName}は日本の人気観光スポットの一つです。訪問の際は事前にチケットを購入し、混雑する時間帯を避けるのがおすすめです。\n\n周辺には素敵な飲食店やお土産店もありますので、ぜひ合わせて楽しんでください。`

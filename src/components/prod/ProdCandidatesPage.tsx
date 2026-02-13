@@ -81,6 +81,13 @@ export function ProdCandidatesPage({ tripGroupId }: Props) {
       origin: departure,
     }).catch(() => {});
 
+    // バックグラウンドで候補画像を取得
+    post("/api/ai/image", {
+      candidate_id: data.candidate.id,
+      candidate_name: name,
+      trip_group_id: tripGroupId,
+    }).catch(() => {});
+
     setShowAddCandidateModal(false);
   };
 

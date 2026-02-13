@@ -10,12 +10,20 @@ interface GoAiPlanRequest {
   questions?: string[];
 }
 
+interface GoAiImageRequest {
+  query: string;
+}
+
 interface GoAiPlanResponse {
   tag: { budget_jpy: number; travel_time: string };
   info: string;
   description: string;
   survey: Array<{ question: string; answer: string }> | null;
   image?: string;
+}
+
+interface GoAiImageResponse {
+  url: string;
 }
 
 export class GoAiService implements IAiService {
@@ -61,6 +69,24 @@ export class GoAiService implements IAiService {
         qa: response.survey ? response.survey.map((s) => ({ q: s.question, a: s.answer })) : [],
       },
     };
+  }
+
+  async fetchImage(query: string): Promise<string | null> {
+    const request: GoAiImageRequest = {
+      query: query.trim(),
+    };
+
+    if (!request.query) {
+      return null;
+    }
+
+    try {
+      const response = await this.callImageApi(request);
+      return response.url || null;
+    } catch (error) {
+      console.error("Failed to fetch image from Go AI Server", error);
+      return null;
+    }
   }
 
   streamAnswer(question: string, candidateName: string | null): AiStreamResult {
@@ -119,6 +145,28 @@ export class GoAiService implements IAiService {
 
       if (!response.ok) {
         throw new Error(`Go AI Server error: ${response.status}`);
+      }
+
+      return await response.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  private async callImageApi(request: GoAiImageRequest): Promise<GoAiImageResponse> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(`${this.baseUrl}/image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Go AI Server image error: ${response.status}`);
       }
 
       return await response.json();

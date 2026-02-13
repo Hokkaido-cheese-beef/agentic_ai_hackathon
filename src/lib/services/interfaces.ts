@@ -5,8 +5,6 @@ import type { CandidateTag, AiSummary } from "@/types";
 
 export interface AiSummaryResult {
   description: string;
-  rating: number;
-  reviewCount: number;
   tags: CandidateTag[];
   info: string;
   aiSummary: AiSummary;

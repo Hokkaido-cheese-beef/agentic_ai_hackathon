@@ -38,8 +38,6 @@ describe("POST /api/ai/summarize", () => {
   it("200: AI分析成功", async () => {
     const aiResult = {
       description: "沖縄を代表する水族館",
-      rating: 4.5,
-      reviewCount: 1000,
       tags: [{ icon: "waves", label: "海洋", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" }],
       info: "詳細情報",
       aiSummary: { headline: "必見スポット", qa: [{ q: "料金は？", a: "大人1880円" }] },
@@ -59,8 +57,8 @@ describe("POST /api/ai/summarize", () => {
       name: "美ら海水族館",
       description: "沖縄を代表する水族館",
       image_url: null,
-      rating: 4.5,
-      review_count: 1000,
+      rating: null,
+      review_count: null,
       tags: aiResult.tags,
       info: "詳細情報",
       ai_summary: aiResult.aiSummary,

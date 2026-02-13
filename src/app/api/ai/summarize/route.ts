@@ -20,8 +20,6 @@ export async function POST(request: Request) {
 
     const candidate = await (await getCandidateRepository()).update(candidate_id, trip_group_id, {
       description: result.description || null,
-      rating: result.rating || null,
-      review_count: result.reviewCount || null,
       tags: result.tags || [],
       info: result.info || null,
       ai_summary: result.aiSummary || null,

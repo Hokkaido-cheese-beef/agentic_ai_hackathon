@@ -39,8 +39,6 @@ export class GoAiService implements IAiService {
     // Go の /plan レスポンスを AiSummaryResult に変換
     return {
       description: response.description || "",
-      rating: 4.0, // デフォルト値（/plan では rating なし）
-      reviewCount: 0, // デフォルト値（/plan では review_count なし）
       tags: [
         {
           icon: "Wallet",

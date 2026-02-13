@@ -27,11 +27,34 @@ export function AddCandidateModal({
     setIsSubmitting(true);
     setError(null);
 
-    const isUrl = /^https?:\/\//.test(inputValue.trim());
-    const name = inputValue.trim();
-    const sourceUrl = isUrl ? inputValue.trim() : null;
+    const trimmed = inputValue.trim();
+    const isUrl = /^https?:\/\//.test(trimmed);
+    let name = trimmed;
+    const sourceUrl = isUrl ? trimmed : null;
 
     try {
+      if (isUrl) {
+        // URLの場合はサーバーサイドでページタイトルを取得
+        try {
+          const res = await fetch("/api/url-metadata", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url: trimmed }),
+          });
+          if (res.ok) {
+            const meta = await res.json();
+            if (meta.title) {
+              name = meta.title;
+            } else {
+              name = new URL(trimmed).hostname;
+            }
+          } else {
+            name = new URL(trimmed).hostname;
+          }
+        } catch {
+          name = new URL(trimmed).hostname;
+        }
+      }
       await onSubmit(name, sourceUrl);
       setInputValue("");
     } catch (e) {

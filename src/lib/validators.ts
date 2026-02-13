@@ -37,6 +37,11 @@ export const aiQuestionSchema = z.object({
   trip_group_id: z.string().uuid("グループIDが不正です"),
 });
 
+// --- URL Metadata ---
+export const urlMetadataSchema = z.object({
+  url: z.string().url("URLが不正です").max(2000),
+});
+
 // --- AI Summary Response (AI応答JSON検証) ---
 const aiTagSchema = z.object({
   icon: z.string(),

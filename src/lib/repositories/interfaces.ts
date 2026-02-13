@@ -7,8 +7,6 @@ import type { TripGroup, TripCandidate, Question, CandidateTag, AiSummary } from
 
 export interface CandidateUpdateData {
   description: string | null;
-  rating: number | null;
-  review_count: number | null;
   tags: CandidateTag[];
   info: string | null;
   ai_summary: AiSummary | null;

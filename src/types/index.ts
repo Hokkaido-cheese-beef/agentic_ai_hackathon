@@ -36,8 +36,6 @@ export interface TripCandidate {
   name: string;
   description: string | null;
   image_url: string | null;
-  rating: number | null;
-  review_count: number | null;
   tags: CandidateTag[];
   info: string | null;
   ai_summary: AiSummary | null;
@@ -61,8 +59,6 @@ export interface FirestoreCandidate {
   name: string;
   description: string | null;
   image_url: string | null;
-  rating: number | null;
-  review_count: number | null;
   tags: CandidateTag[];
   info: string | null;
   ai_summary: AiSummary | null;

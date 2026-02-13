@@ -51,8 +51,6 @@ export class DemoCandidateRepository implements ICandidateRepository {
       name: data.name,
       description: null,
       image_url: null,
-      rating: null,
-      review_count: null,
       tags: [],
       info: null,
       ai_summary: null,

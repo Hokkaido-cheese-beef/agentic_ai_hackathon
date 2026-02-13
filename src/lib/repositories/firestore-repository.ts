@@ -192,7 +192,6 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
     if (data.tags !== undefined) updateData.tags = data.tags;
     if (data.info !== undefined) updateData.info = data.info;
     if (data.ai_summary !== undefined) updateData.ai_summary = data.ai_summary;
-    if (data.image_url !== undefined) updateData.image_url = data.image_url;
     updateData.updated_at = FieldValue.serverTimestamp();
 
     const docRef = adminDb

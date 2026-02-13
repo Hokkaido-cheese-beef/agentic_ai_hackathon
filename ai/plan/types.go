@@ -25,6 +25,5 @@ type TravelPlan struct {
 	Info        string       `json:"info"`
 	Description string       `json:"description"`
 	Survey      []SurveyItem `json:"survey"`
-	Image       string       `json:"image"`
 }
 

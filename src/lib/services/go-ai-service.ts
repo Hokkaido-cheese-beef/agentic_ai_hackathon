@@ -60,7 +60,11 @@ export class GoAiService implements IAiService {
       questions: [],
     };
 
-    const response = await this.callPlanApi(request);
+    // /plan と /image を並行して呼び出す
+    const [response, imageUrl] = await Promise.all([
+      this.callPlanApi(request),
+      this.callImageApi(candidateName),
+    ]);
 
     // Go の /plan レスポンスを AiSummaryResult に変換
     return {
@@ -88,6 +92,7 @@ export class GoAiService implements IAiService {
         headline: response.description || "",
         qa: response.survey ? response.survey.map((s) => ({ q: s.question, a: s.answer })) : [],
       },
+      imageUrl,
     };
   }
 
@@ -131,6 +136,39 @@ export class GoAiService implements IAiService {
     });
 
     return { stream, fullText };
+  }
+
+  private async callImageApi(query: string): Promise<string | null> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (!this.isLocalAiEndpoint()) {
+        const audience = new URL(this.baseUrl).origin;
+        headers.Authorization = `Bearer ${await this.getCloudRunIdToken(audience)}`;
+      }
+
+      const response = await fetch(`${this.baseUrl}/image`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ query }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        console.warn(`Image API returned ${response.status} for query: ${query}`);
+        return null;
+      }
+
+      const data = (await response.json()) as { url?: string };
+      return data.url || null;
+    } catch (error) {
+      console.warn("Image API call failed, skipping image", error);
+      return null;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 
   private async callPlanApi(request: GoAiPlanRequest): Promise<GoAiPlanResponse> {

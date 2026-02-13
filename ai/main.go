@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Hokkaido-cheese-beef/agentic_ai_hackathon/ai/image"
 	"github.com/Hokkaido-cheese-beef/agentic_ai_hackathon/ai/plan"
 	"github.com/joho/godotenv"
 )
@@ -57,8 +58,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	imageHandler, err := image.NewHandler()
+	if err != nil {
+		slog.Warn("Image handler disabled", "error", err)
+	}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("POST /plan", server.HandlePlan)
+	if imageHandler != nil {
+		mux.HandleFunc("POST /image", imageHandler.HandleImage)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {

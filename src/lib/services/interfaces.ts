@@ -10,6 +10,7 @@ export interface AiSummaryResult {
   tags: CandidateTag[];
   info: string;
   aiSummary: AiSummary;
+  imageUrl?: string | null;
 }
 
 export interface AiStreamResult {

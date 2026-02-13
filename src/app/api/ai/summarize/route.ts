@@ -16,27 +16,15 @@ export async function POST(request: Request) {
 
     const { candidate_id, candidate_name, source_url, trip_group_id, origin } = validated.data;
 
-    const [aiSvc, candRepo] = await Promise.all([getAiService(), getCandidateRepository()]);
-    const [result, existing] = await Promise.all([
-      aiSvc.summarize(candidate_name, source_url, origin),
-      candRepo.findById(trip_group_id, candidate_id),
-    ]);
+    const result = await (await getAiService()).summarize(candidate_name, source_url, origin);
 
-    // 既存の qa を保持しつつ ai_summary をマージ（レースコンディション防止）
-    const existingQa = existing?.ai_summary?.qa ?? [];
-    const newQa = result.aiSummary?.qa ?? [];
-    const mergedAiSummary = result.aiSummary
-      ? { ...result.aiSummary, qa: [...existingQa, ...newQa] }
-      : existing?.ai_summary ?? null;
-
-    const candidate = await candRepo.update(candidate_id, trip_group_id, {
+    const candidate = await (await getCandidateRepository()).update(candidate_id, trip_group_id, {
       description: result.description || null,
       rating: result.rating || null,
       review_count: result.reviewCount || null,
       tags: result.tags || [],
       info: result.info || null,
-      ai_summary: mergedAiSummary,
-      image_url: result.imageUrl || null,
+      ai_summary: result.aiSummary || null,
     });
 
     return NextResponse.json({ candidate });

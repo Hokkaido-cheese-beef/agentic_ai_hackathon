@@ -14,7 +14,7 @@ export function AppHeader({ groupName }: AppHeaderProps) {
           <MapPin className="h-4 w-4 text-white" />
         </div>
         <span className="text-base font-bold text-foreground">
-          {groupName || "TripVote"}
+          {groupName || "つぎココ"}
         </span>
       </div>
     </header>

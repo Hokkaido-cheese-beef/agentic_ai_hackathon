@@ -18,9 +18,9 @@ describe("画面1: トップ＆グループ作成", () => {
     vi.clearAllMocks();
   });
 
-  it("TripVoteタイトルが表示される", () => {
+  it("つぎココタイトルが表示される", () => {
     render(<TopPage />);
-    expect(screen.getByText("TripVote")).toBeInTheDocument();
+    expect(screen.getByText("つぎココ")).toBeInTheDocument();
   });
 
   it("サブタイトルが表示される", () => {

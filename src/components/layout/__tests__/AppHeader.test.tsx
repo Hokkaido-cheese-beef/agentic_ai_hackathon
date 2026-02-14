@@ -3,9 +3,9 @@ import { describe, it, expect } from "vitest";
 import { AppHeader } from "../AppHeader";
 
 describe("AppHeader", () => {
-  it("ロゴとデフォルトのTripVoteテキストを表示する", () => {
+  it("ロゴとデフォルトのつぎココテキストを表示する", () => {
     render(<AppHeader />);
-    expect(screen.getByText("TripVote")).toBeInTheDocument();
+    expect(screen.getByText("つぎココ")).toBeInTheDocument();
   });
 
   it("groupNameが渡された場合、グループ名を表示する", () => {

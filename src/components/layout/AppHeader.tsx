@@ -13,9 +13,11 @@ export function AppHeader({ groupName }: AppHeaderProps) {
         <div className="flex h-7 w-7 items-center justify-center rounded-md bg-primary">
           <MapPin className="h-4 w-4 text-white" />
         </div>
-        <span className="text-base font-bold text-foreground">
-          {groupName || "つぎココ"}
-        </span>
+        {groupName && (
+          <span className="text-base font-bold text-foreground">
+            {groupName}
+          </span>
+        )}
       </div>
     </header>
   );

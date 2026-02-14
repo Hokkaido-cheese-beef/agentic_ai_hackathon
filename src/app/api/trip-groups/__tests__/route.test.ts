@@ -29,10 +29,17 @@ describe("POST /api/trip-groups", () => {
       departure: null,
       status: "draft",
       created_at: new Date().toISOString(),
+      departure_type: "text",
+      departure_value: "東京",
+      departure_raw: "東京",
     };
     mockCreate.mockResolvedValueOnce(mockGroup);
 
-    const res = await POST(makeRequest({ name: "沖縄旅行" }));
+    const res = await POST(makeRequest({
+      name: "沖縄旅行",
+      departure_value: "東京",
+      departure_type: "text",
+    }));
     const data = await res.json();
 
     expect(res.status).toBe(201);
@@ -40,7 +47,7 @@ describe("POST /api/trip-groups", () => {
   });
 
   it("400: nameが空の場合", async () => {
-    const res = await POST(makeRequest({ name: "" }));
+    const res = await POST(makeRequest({ name: "", departure_value: "東京" }));
     const data = await res.json();
 
     expect(res.status).toBe(400);
@@ -48,7 +55,7 @@ describe("POST /api/trip-groups", () => {
   });
 
   it("400: nameがない場合", async () => {
-    const res = await POST(makeRequest({}));
+    const res = await POST(makeRequest({ departure_value: "東京" }));
     const data = await res.json();
 
     expect(res.status).toBe(400);
@@ -56,17 +63,34 @@ describe("POST /api/trip-groups", () => {
   });
 
   it("400: nameが数値の場合", async () => {
-    const res = await POST(makeRequest({ name: 123 }));
+    const res = await POST(makeRequest({ name: 123, departure_value: "東京" }));
     const data = await res.json();
 
     expect(res.status).toBe(400);
     expect(data.error).toBeDefined();
   });
 
+  it("400: departure_valueが空の場合", async () => {
+    const res = await POST(makeRequest({ name: "テスト", departure_value: "" }));
+    const data = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(data.error).toBe("出発地点は必須です");
+  });
+
+  it("400: departure_valueがない場合", async () => {
+    const res = await POST(makeRequest({ name: "テスト" }));
+    const data = await res.json();
+
+    expect(res.status).toBe(400);
+    expect(data.error).toBeDefined();
+    expect(data.error).toContain("string");
+  });
+
   it("500: リポジトリエラー時", async () => {
     mockCreate.mockRejectedValueOnce(new Error("DB error"));
 
-    const res = await POST(makeRequest({ name: "テスト" }));
+    const res = await POST(makeRequest({ name: "テスト", departure_value: "東京" }));
     const data = await res.json();
 
     expect(res.status).toBe(500);

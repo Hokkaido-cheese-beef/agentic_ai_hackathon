@@ -17,7 +17,14 @@ function ensureClientSeeded() {
 
 // --- TripGroup ---
 
-export async function demoCreateTripGroup(name: string): Promise<TripGroup> {
+export async function demoCreateTripGroup(
+  name: string,
+  options?: {
+    departure_type?: string;
+    departure_value?: string;
+    departure_raw?: string;
+  }
+): Promise<TripGroup> {
   ensureClientSeeded();
   const group: TripGroup = {
     trip_group_id: crypto.randomUUID(),
@@ -25,6 +32,9 @@ export async function demoCreateTripGroup(name: string): Promise<TripGroup> {
     departure: null,
     status: "draft",
     created_at: new Date().toISOString(),
+    departure_type: options?.departure_type as "text" | "geolocation" | "postal_code" | undefined,
+    departure_value: options?.departure_value,
+    departure_raw: options?.departure_raw,
   };
   demoStore.addTripGroup(group);
   return group;

@@ -29,6 +29,8 @@ interface GoAiImageResponse {
 export class GoAiService implements IAiService {
   private readonly baseUrl: string;
   private readonly timeout: number;
+  private cachedIdToken: string | null = null;
+  private cachedIdTokenExp = 0;
 
   constructor() {
     this.baseUrl = process.env.GO_AI_SERVER_URL || "http://localhost:8080";
@@ -136,9 +138,13 @@ export class GoAiService implements IAiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
+      const authHeader = await this.getAuthHeader();
       const response = await fetch(`${this.baseUrl}/plan`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
         body: JSON.stringify(request),
         signal: controller.signal,
       });
@@ -158,9 +164,13 @@ export class GoAiService implements IAiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
+      const authHeader = await this.getAuthHeader();
       const response = await fetch(`${this.baseUrl}/image`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(authHeader ? { Authorization: authHeader } : {}),
+        },
         body: JSON.stringify(request),
         signal: controller.signal,
       });
@@ -173,5 +183,73 @@ export class GoAiService implements IAiService {
     } finally {
       clearTimeout(timeoutId);
     }
+  }
+
+  private async getAuthHeader(): Promise<string | undefined> {
+    // ローカル検証や手動トークン指定向け
+    const staticToken = process.env.GO_AI_ID_TOKEN?.trim();
+    if (staticToken) {
+      return `Bearer ${staticToken}`;
+    }
+
+    // Cloud Run 同士の private 呼び出し向けに metadata server から ID トークンを取得
+    const audience = this.getAudience();
+    if (!audience) return undefined;
+
+    const now = Math.floor(Date.now() / 1000);
+    if (this.cachedIdToken && this.cachedIdTokenExp - now > 60) {
+      return `Bearer ${this.cachedIdToken}`;
+    }
+
+    try {
+      const url =
+        "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity" +
+        `?audience=${encodeURIComponent(audience)}&format=full`;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers: { "Metadata-Flavor": "Google" },
+      });
+
+      if (!response.ok) {
+        return undefined;
+      }
+
+      const token = (await response.text()).trim();
+      if (!token) return undefined;
+
+      this.cachedIdToken = token;
+      this.cachedIdTokenExp = this.getJwtExp(token) ?? now + 300;
+      return `Bearer ${token}`;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private getAudience(): string | null {
+    try {
+      const parsed = new URL(this.baseUrl);
+      if (parsed.protocol !== "https:") return null;
+      return parsed.origin;
+    } catch {
+      return null;
+    }
+  }
+
+  private getJwtExp(token: string): number | null {
+    try {
+      const parts = token.split(".");
+      if (parts.length < 2) return null;
+      const payload = JSON.parse(Buffer.from(this.toBase64(parts[1]), "base64").toString("utf8")) as { exp?: number };
+      return typeof payload.exp === "number" ? payload.exp : null;
+    } catch {
+      return null;
+    }
+  }
+
+  private toBase64(input: string): string {
+    const normalized = input.replace(/-/g, "+").replace(/_/g, "/");
+    const padding = normalized.length % 4 === 0 ? "" : "=".repeat(4 - (normalized.length % 4));
+    return normalized + padding;
   }
 }

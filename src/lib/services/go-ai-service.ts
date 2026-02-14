@@ -87,7 +87,8 @@ export class GoAiService implements IAiService {
       return response.url || null;
     } catch (error) {
       console.error("Failed to fetch image from Go AI Server", error);
-      return null;
+      // フォールバック: Unsplash のランダム旅行画像
+      return `https://source.unsplash.com/800x600/?travel,${encodeURIComponent(query)}`;
     }
   }
 

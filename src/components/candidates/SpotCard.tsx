@@ -18,6 +18,7 @@ export function SpotCard({ candidate }: SpotCardProps) {
             src={candidate.image_url}
             alt={candidate.name}
             fill
+            unoptimized
             className="object-cover"
           />
         ) : (

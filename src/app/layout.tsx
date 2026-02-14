@@ -9,7 +9,7 @@ const ibmPlexSans = IBM_Plex_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "TripVote - グループ旅行の行き先をみんなで決めよう",
+  title: "つぎココ - グループ旅行の行き先をみんなで決めよう",
   description:
     "AIが旅行候補を整理し、グループで比較・投票できるサービス",
 };

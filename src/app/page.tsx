@@ -77,7 +77,7 @@ export default function TopPage() {
             <MapPin className="h-12 w-12 text-white" />
           </div>
           <h1 className="text-[32px] font-bold text-foreground text-center">
-            TripVote
+            つぎココ
           </h1>
           <p className="text-lg text-text-secondary text-center leading-[1.5] whitespace-pre-line">
             {"グループ旅行の行き先を\nみんなで決めよう"}

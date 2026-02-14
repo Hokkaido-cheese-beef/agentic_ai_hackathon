@@ -4,6 +4,10 @@ import { z } from "zod";
 export const createTripGroupSchema = z.object({
   name: z.string().min(1, "グループ名を入力してください").max(100),
   departure: z.string().max(200).nullable().optional(),
+  // 位置情報フィールド追加 (#14)
+  departure_type: z.enum(["text", "geolocation", "postal_code"]).optional(),
+  departure_value: z.string().min(1, "出発地点は必須です").max(500),
+  departure_raw: z.string().max(500).optional(),
 });
 
 // --- Candidates ---

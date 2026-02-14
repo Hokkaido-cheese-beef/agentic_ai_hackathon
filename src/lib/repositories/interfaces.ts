@@ -14,7 +14,13 @@ export interface CandidateUpdateData {
 }
 
 export interface ITripGroupRepository {
-  create(data: { name: string; departure?: string | null }): Promise<TripGroup>;
+  create(data: {
+    name: string;
+    departure?: string | null;
+    departure_type?: string;
+    departure_value?: string;
+    departure_raw?: string;
+  }): Promise<TripGroup>;
   findById(tripGroupId: string): Promise<TripGroup | null>;
 }
 

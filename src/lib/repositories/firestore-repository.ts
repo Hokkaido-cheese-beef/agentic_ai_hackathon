@@ -35,6 +35,9 @@ function toTripGroupDomain(tripGroupId: string, data: Record<string, unknown>): 
     departure: (data.departure as string | null) ?? null,
     status: (data.status as TripGroup["status"]) ?? "draft",
     created_at: normalizeDate(data.created_at) || nowIso(),
+    departure_type: (data.departure_type as TripGroup["departure_type"]) ?? undefined,
+    departure_value: (data.departure_value as string | undefined) ?? undefined,
+    departure_raw: (data.departure_raw as string | undefined) ?? undefined,
   };
 }
 
@@ -45,6 +48,8 @@ function toCandidateDomain(tripGroupId: string, candidateId: string, data: Recor
     name: (data.name as string) ?? "",
     description: (data.description as string | null) ?? null,
     image_url: (data.image_url as string | null) ?? null,
+    rating: (data.rating as number | null) ?? null,
+    review_count: (data.review_count as number | null) ?? null,
     tags: normalizeTags(data.tags),
     info: (data.info as string | null) ?? null,
     ai_summary: normalizeAiSummary(data.ai_summary),
@@ -66,19 +71,29 @@ function toQuestionDomain(tripGroupId: string, questionId: string, data: Record<
 }
 
 export class FirestoreTripGroupRepository implements ITripGroupRepository {
-  async create(data: { name: string; departure?: string | null }): Promise<TripGroup> {
+  async create(data: {
+    name: string;
+    departure?: string | null;
+    departure_type?: string;
+    departure_value?: string;
+    departure_raw?: string;
+  }): Promise<TripGroup> {
     const tripGroupId = crypto.randomUUID();
     const createdAt = nowIso();
 
+    const firestoreData: Record<string, unknown> = {
+      name: data.name,
+      departure: data.departure ?? null,
+      status: "draft",
+      created_at: createdAt,
+      updated_at: FieldValue.serverTimestamp(),
+    };
+    if (data.departure_type) firestoreData.departure_type = data.departure_type;
+    if (data.departure_value) firestoreData.departure_value = data.departure_value;
+    if (data.departure_raw) firestoreData.departure_raw = data.departure_raw;
+
     await withRetry(
-      () =>
-        adminDb.collection("tripGroups").doc(tripGroupId).set({
-          name: data.name,
-          departure: data.departure ?? null,
-          status: "draft",
-          created_at: createdAt,
-          updated_at: FieldValue.serverTimestamp(),
-        }),
+      () => adminDb.collection("tripGroups").doc(tripGroupId).set(firestoreData),
       { label: "createTripGroup" }
     );
 
@@ -88,6 +103,9 @@ export class FirestoreTripGroupRepository implements ITripGroupRepository {
       departure: data.departure ?? null,
       status: "draft",
       created_at: createdAt,
+      departure_type: data.departure_type as TripGroup["departure_type"],
+      departure_value: data.departure_value,
+      departure_raw: data.departure_raw,
     };
   }
 
@@ -120,6 +138,8 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
             source_url: data.sourceUrl ?? null,
             description: null,
             image_url: null,
+            rating: null,
+            review_count: null,
             tags: [],
             info: null,
             ai_summary: null,
@@ -136,6 +156,8 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
       name: data.name,
       description: null,
       image_url: null,
+      rating: null,
+      review_count: null,
       tags: [],
       info: null,
       ai_summary: null,
@@ -181,7 +203,8 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
   async update(candidateId: string, tripGroupId: string, data: Partial<CandidateUpdateData>): Promise<TripCandidate> {
     const updateData: Record<string, unknown> = {};
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.image_url !== undefined) updateData.image_url = data.image_url;
+    if (data.rating !== undefined) updateData.rating = data.rating;
+    if (data.review_count !== undefined) updateData.review_count = data.review_count;
     if (data.tags !== undefined) updateData.tags = data.tags;
     if (data.info !== undefined) updateData.info = data.info;
     if (data.ai_summary !== undefined) updateData.ai_summary = data.ai_summary;
@@ -262,14 +285,13 @@ export class FirestoreQuestionRepository implements IQuestionRepository {
           .doc(tripGroupId)
           .collection("questions")
           .where("candidate_id", "==", null)
+          .orderBy("created_at", "asc")
           .get(),
       { label: "findGlobalQuestions" }
     );
 
-    return snap.docs
-      .map((doc) =>
-        toQuestionDomain(tripGroupId, doc.id, (doc.data() ?? {}) as Record<string, unknown>)
-      )
-      .sort((a, b) => a.created_at.localeCompare(b.created_at));
+    return snap.docs.map((doc) =>
+      toQuestionDomain(tripGroupId, doc.id, (doc.data() ?? {}) as Record<string, unknown>)
+    );
   }
 }

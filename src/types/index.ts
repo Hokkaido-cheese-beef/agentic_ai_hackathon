@@ -1,14 +1,26 @@
 /**
- * TripVote 共通型定義
+ * つぎココ 共通型定義
  */
 
 // --- TripGroup ---
+export type DepartureType = "text" | "geolocation" | "postal_code";
+
+export interface DepartureInfo {
+  type: DepartureType;
+  value: string;
+  raw?: string;
+}
+
 export interface TripGroup {
   trip_group_id: string;
   name: string;
   departure: string | null;
   status: "draft" | "active" | "completed";
   created_at: string;
+  // 位置情報フィールド追加 (#14)
+  departure_type?: DepartureType;
+  departure_value?: string;
+  departure_raw?: string;
 }
 
 // --- TripCandidate ---

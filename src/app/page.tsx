@@ -135,7 +135,7 @@ export default function TopPage() {
           departure_value: trimmedDeparture,
           departure_raw: trimmedDeparture,
         });
-        router.push(`/trip-groups/${group.trip_group_id}`);
+        router.push(`/trip-groups/${group.trip_group_id}/invite`);
       } else {
         const data = await post<{ tripGroup: { trip_group_id: string } }>(
           "/api/trip-groups",
@@ -146,7 +146,7 @@ export default function TopPage() {
             departure_raw: trimmedDeparture,
           }
         );
-        router.push(`/trip-groups/${data.tripGroup.trip_group_id}`);
+        router.push(`/trip-groups/${data.tripGroup.trip_group_id}/invite`);
       }
     } catch (e) {
       setError(e instanceof Error ? e.message : "グループの作成に失敗しました");

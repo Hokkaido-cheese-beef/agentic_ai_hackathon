@@ -12,9 +12,6 @@ export function AiSummaryCard({ aiSummary }: AiSummaryCardProps) {
         <Sparkles className="h-4 w-4 text-[#92400E]" />
         <span className="text-sm font-bold text-[#92400E]">AI分析</span>
       </div>
-      <p className="text-sm font-semibold text-foreground leading-[1.5]">
-        {aiSummary.headline}
-      </p>
       <div className="flex flex-col gap-2">
         {aiSummary.qa.map((item, i) => (
           <div key={i} className="flex flex-col gap-1 [border-radius:var(--card-radius-small)] bg-[#FEF3C7] p-2.5">

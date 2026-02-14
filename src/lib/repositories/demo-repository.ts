@@ -51,8 +51,6 @@ export class DemoCandidateRepository implements ICandidateRepository {
       name: data.name,
       description: null,
       image_url: null,
-      rating: null,
-      review_count: null,
       tags: [],
       info: null,
       ai_summary: null,
@@ -100,5 +98,10 @@ export class DemoQuestionRepository implements IQuestionRepository {
     ensureSeeded();
     demoStore.updateQuestion(questionId, { ai_answer: data.aiAnswer });
     return demoStore.getQuestion(questionId) as Question;
+  }
+
+  async findGlobalByGroupId(tripGroupId: string): Promise<Question[]> {
+    ensureSeeded();
+    return demoStore.getQuestionsByGroup(tripGroupId).filter((q) => q.candidate_id === null);
   }
 }

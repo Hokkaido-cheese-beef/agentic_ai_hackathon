@@ -37,6 +37,13 @@ export const aiQuestionSchema = z.object({
   trip_group_id: z.string().uuid("グループIDが不正です"),
 });
 
+// --- AI Image ---
+export const aiImageSchema = z.object({
+  candidate_id: z.string().uuid("候補IDが不正です"),
+  candidate_name: z.string().min(1, "候補名が必要です").max(200),
+  trip_group_id: z.string().uuid("グループIDが不正です"),
+});
+
 // --- AI Summary Response (AI応答JSON検証) ---
 const aiTagSchema = z.object({
   icon: z.string(),
@@ -53,8 +60,6 @@ const aiQaSchema = z.object({
 
 export const aiSummaryResponseSchema = z.object({
   description: z.string().optional(),
-  rating: z.number().min(0).max(5).optional(),
-  review_count: z.number().int().min(0).optional(),
   tags: z.array(aiTagSchema).optional(),
   info: z.string().optional(),
   ai_summary: z

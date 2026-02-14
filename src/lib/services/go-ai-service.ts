@@ -10,11 +10,20 @@ interface GoAiPlanRequest {
   questions?: string[];
 }
 
+interface GoAiImageRequest {
+  query: string;
+}
+
 interface GoAiPlanResponse {
   tag: { budget_jpy: number; travel_time: string };
+  info: string;
   description: string;
   survey: Array<{ question: string; answer: string }> | null;
   image?: string;
+}
+
+interface GoAiImageResponse {
+  url: string;
 }
 
 export class GoAiService implements IAiService {
@@ -24,33 +33,6 @@ export class GoAiService implements IAiService {
   constructor() {
     this.baseUrl = process.env.GO_AI_SERVER_URL || "http://localhost:8080";
     this.timeout = Number(process.env.GO_AI_TIMEOUT_MS || "30000");
-  }
-
-  private isLocalAiEndpoint(): boolean {
-    try {
-      const url = new URL(this.baseUrl);
-      return ["localhost", "127.0.0.1", "0.0.0.0", "::1"].includes(url.hostname);
-    } catch {
-      return false;
-    }
-  }
-
-  private async getCloudRunIdToken(audience: string): Promise<string> {
-    const token = process.env.GO_AI_ID_TOKEN;
-    if (token) return token;
-
-    const metadataUrl =
-      `http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/identity` +
-      `?audience=${encodeURIComponent(audience)}&format=full`;
-    const response = await fetch(metadataUrl, {
-      headers: { "Metadata-Flavor": "Google" },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to get Cloud Run ID token: ${response.status}`);
-    }
-
-    return await response.text();
   }
 
   async summarize(candidateName: string, sourceUrl?: string | null, origin?: string | null): Promise<AiSummaryResult> {
@@ -65,8 +47,6 @@ export class GoAiService implements IAiService {
     // Go の /plan レスポンスを AiSummaryResult に変換
     return {
       description: response.description || "",
-      rating: 4.0, // デフォルト値（/plan では rating なし）
-      reviewCount: 0, // デフォルト値（/plan では review_count なし）
       tags: [
         {
           icon: "Wallet",
@@ -83,12 +63,30 @@ export class GoAiService implements IAiService {
           bgColor: "#FFFBEB",
         },
       ],
-      info: response.description || "",
+      info: response.info || "",
       aiSummary: {
-        headline: response.description || "",
+        headline: "",
         qa: response.survey ? response.survey.map((s) => ({ q: s.question, a: s.answer })) : [],
       },
     };
+  }
+
+  async fetchImage(query: string): Promise<string | null> {
+    const request: GoAiImageRequest = {
+      query: query.trim(),
+    };
+
+    if (!request.query) {
+      return null;
+    }
+
+    try {
+      const response = await this.callImageApi(request);
+      return response.url || null;
+    } catch (error) {
+      console.error("Failed to fetch image from Go AI Server", error);
+      return null;
+    }
   }
 
   streamAnswer(question: string, candidateName: string | null): AiStreamResult {
@@ -138,21 +136,37 @@ export class GoAiService implements IAiService {
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (!this.isLocalAiEndpoint()) {
-        const audience = new URL(this.baseUrl).origin;
-        headers.Authorization = `Bearer ${await this.getCloudRunIdToken(audience)}`;
-      }
-
       const response = await fetch(`${this.baseUrl}/plan`, {
         method: "POST",
-        headers,
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(request),
         signal: controller.signal,
       });
 
       if (!response.ok) {
         throw new Error(`Go AI Server error: ${response.status}`);
+      }
+
+      return await response.json();
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  private async callImageApi(request: GoAiImageRequest): Promise<GoAiImageResponse> {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+    try {
+      const response = await fetch(`${this.baseUrl}/image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(request),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Go AI Server image error: ${response.status}`);
       }
 
       return await response.json();

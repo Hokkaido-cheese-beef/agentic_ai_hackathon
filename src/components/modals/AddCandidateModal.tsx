@@ -63,7 +63,7 @@ export function AddCandidateModal({
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="名前やURLを入力..."
-            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-text-muted outline-none"
+            className="flex-1 bg-transparent text-base text-foreground placeholder:text-text-muted outline-none"
           />
         </div>
 

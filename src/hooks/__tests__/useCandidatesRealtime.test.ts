@@ -114,8 +114,6 @@ describe("useCandidatesRealtime", () => {
         trip_group_id: tripGroupId,
         description: null,
         image_url: null,
-        rating: null,
-        review_count: null,
         tags: [],
         info: null,
         ai_summary: null,

@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getAiService, getCandidateRepository } from "@/lib/container";
-import { aiSummarizeSchema } from "@/lib/validators";
+import { aiImageSchema } from "@/lib/validators";
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validated = aiSummarizeSchema.safeParse(body);
+    const validated = aiImageSchema.safeParse(body);
 
     if (!validated.success) {
       return NextResponse.json(
@@ -14,22 +14,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const { candidate_id, candidate_name, source_url, trip_group_id, origin } = validated.data;
+    const { candidate_id, candidate_name, trip_group_id } = validated.data;
+    const imageUrl = await (await getAiService()).fetchImage(candidate_name);
 
-    const result = await (await getAiService()).summarize(candidate_name, source_url, origin);
+    if (!imageUrl) {
+      return NextResponse.json({ image_url: null });
+    }
 
     const candidate = await (await getCandidateRepository()).update(candidate_id, trip_group_id, {
-      description: result.description || null,
-      tags: result.tags || [],
-      info: result.info || null,
-      ai_summary: result.aiSummary || null,
+      image_url: imageUrl,
     });
 
     return NextResponse.json({ candidate });
   } catch (error) {
-    console.error("Failed to summarize candidate", error);
+    console.error("Failed to fetch candidate image", error);
     return NextResponse.json(
-      { error: "AI分析に失敗しました" },
+      { error: "画像の取得に失敗しました" },
       { status: 500 }
     );
   }

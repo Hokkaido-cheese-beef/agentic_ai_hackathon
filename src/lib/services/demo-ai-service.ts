@@ -9,8 +9,6 @@ export class DemoAiService implements IAiService {
     await new Promise((r) => setTimeout(r, 500));
     return {
       description: "日本で人気の観光スポットです",
-      rating: 4.2,
-      reviewCount: 5800,
       tags: [
         { icon: "MapPin", label: "観光地", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" },
         { icon: "Clock", label: "所要2-3時間", textColor: "#D97706", iconColor: "#F59E0B", bgColor: "#FFFBEB" },
@@ -26,6 +24,11 @@ export class DemoAiService implements IAiService {
         ],
       },
     };
+  }
+
+  async fetchImage(query: string): Promise<string | null> {
+    void query;
+    return null;
   }
 
   streamAnswer(question: string, candidateName: string | null): AiStreamResult {

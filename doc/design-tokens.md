@@ -8,7 +8,6 @@
 --text-secondary: #64748B   /* サブテキスト */
 --text-muted:     #94A3B8   /* ミュートテキスト */
 --border:         #E2E8F0   /* ボーダー */
---rating:         #FCD34D   /* 星評価 */
 ```
 
 フォント: IBM Plex Sans (`next/font` 経由)

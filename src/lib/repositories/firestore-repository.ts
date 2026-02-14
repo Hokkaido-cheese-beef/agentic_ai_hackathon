@@ -45,8 +45,6 @@ function toCandidateDomain(tripGroupId: string, candidateId: string, data: Recor
     name: (data.name as string) ?? "",
     description: (data.description as string | null) ?? null,
     image_url: (data.image_url as string | null) ?? null,
-    rating: (data.rating as number | null) ?? null,
-    review_count: (data.review_count as number | null) ?? null,
     tags: normalizeTags(data.tags),
     info: (data.info as string | null) ?? null,
     ai_summary: normalizeAiSummary(data.ai_summary),
@@ -122,8 +120,6 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
             source_url: data.sourceUrl ?? null,
             description: null,
             image_url: null,
-            rating: null,
-            review_count: null,
             tags: [],
             info: null,
             ai_summary: null,
@@ -140,8 +136,6 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
       name: data.name,
       description: null,
       image_url: null,
-      rating: null,
-      review_count: null,
       tags: [],
       info: null,
       ai_summary: null,
@@ -187,8 +181,7 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
   async update(candidateId: string, tripGroupId: string, data: Partial<CandidateUpdateData>): Promise<TripCandidate> {
     const updateData: Record<string, unknown> = {};
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.rating !== undefined) updateData.rating = data.rating;
-    if (data.review_count !== undefined) updateData.review_count = data.review_count;
+    if (data.image_url !== undefined) updateData.image_url = data.image_url;
     if (data.tags !== undefined) updateData.tags = data.tags;
     if (data.info !== undefined) updateData.info = data.info;
     if (data.ai_summary !== undefined) updateData.ai_summary = data.ai_summary;
@@ -259,5 +252,24 @@ export class FirestoreQuestionRepository implements IQuestionRepository {
 
     const snap = await withRetry(() => docRef.get(), { label: "getQuestionAfterUpdate" });
     return toQuestionDomain(tripGroupId, questionId, (snap.data() ?? {}) as Record<string, unknown>);
+  }
+
+  async findGlobalByGroupId(tripGroupId: string): Promise<Question[]> {
+    const snap = await withRetry(
+      () =>
+        adminDb
+          .collection("tripGroups")
+          .doc(tripGroupId)
+          .collection("questions")
+          .where("candidate_id", "==", null)
+          .get(),
+      { label: "findGlobalQuestions" }
+    );
+
+    return snap.docs
+      .map((doc) =>
+        toQuestionDomain(tripGroupId, doc.id, (doc.data() ?? {}) as Record<string, unknown>)
+      )
+      .sort((a, b) => a.created_at.localeCompare(b.created_at));
   }
 }

@@ -49,8 +49,6 @@ export async function demoAddCandidate(
     name,
     description: null,
     image_url: null,
-    rating: null,
-    review_count: null,
     tags: [],
     info: null,
     ai_summary: null,
@@ -63,8 +61,6 @@ export async function demoAddCandidate(
   mockSummarize(name).then((summary) => {
     demoStore.updateCandidate(candidate.id, {
       description: summary.description,
-      rating: summary.rating,
-      review_count: summary.review_count,
       tags: summary.tags,
       info: summary.info,
       ai_summary: summary.ai_summary,

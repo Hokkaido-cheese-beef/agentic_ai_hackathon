@@ -7,8 +7,7 @@ import type { TripGroup, TripCandidate, Question, CandidateTag, AiSummary } from
 
 export interface CandidateUpdateData {
   description: string | null;
-  rating: number | null;
-  review_count: number | null;
+  image_url: string | null;
   tags: CandidateTag[];
   info: string | null;
   ai_summary: AiSummary | null;
@@ -29,4 +28,5 @@ export interface ICandidateRepository {
 export interface IQuestionRepository {
   create(data: { content: string; candidateId?: string | null; tripGroupId: string }): Promise<Question>;
   update(questionId: string, tripGroupId: string, data: { aiAnswer: string }): Promise<Question>;
+  findGlobalByGroupId(tripGroupId: string): Promise<Question[]>;
 }

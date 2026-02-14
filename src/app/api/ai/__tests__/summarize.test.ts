@@ -4,12 +4,14 @@ import { POST } from "../summarize/route";
 // Mock container
 const mockSummarize = vi.fn();
 const mockCandidateUpdate = vi.fn();
+const mockCandidateFindById = vi.fn();
 vi.mock("@/lib/container", () => ({
   getAiService: async () => ({
     summarize: mockSummarize,
   }),
   getCandidateRepository: async () => ({
     update: mockCandidateUpdate,
+    findById: mockCandidateFindById,
   }),
 }));
 
@@ -36,22 +38,25 @@ describe("POST /api/ai/summarize", () => {
   it("200: AI分析成功", async () => {
     const aiResult = {
       description: "沖縄を代表する水族館",
-      rating: 4.5,
-      reviewCount: 1000,
       tags: [{ icon: "waves", label: "海洋", textColor: "#059669", iconColor: "#10B981", bgColor: "#ECFDF5" }],
       info: "詳細情報",
       aiSummary: { headline: "必見スポット", qa: [{ q: "料金は？", a: "大人1880円" }] },
     };
 
     mockSummarize.mockResolvedValueOnce(aiResult);
+    // findById: 既存候補（ai_summary に既存 qa がある場合のマージテスト）
+    mockCandidateFindById.mockResolvedValueOnce({
+      id: validBody.candidate_id,
+      trip_group_id: validBody.trip_group_id,
+      name: "美ら海水族館",
+      ai_summary: null,
+    });
     mockCandidateUpdate.mockResolvedValueOnce({
       id: validBody.candidate_id,
       trip_group_id: validBody.trip_group_id,
       name: "美ら海水族館",
       description: "沖縄を代表する水族館",
       image_url: null,
-      rating: 4.5,
-      review_count: 1000,
       tags: aiResult.tags,
       info: "詳細情報",
       ai_summary: aiResult.aiSummary,

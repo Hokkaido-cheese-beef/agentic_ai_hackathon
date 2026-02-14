@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
-  MapPin,
   Plus,
   Users,
   Sparkles,
@@ -159,9 +159,13 @@ export default function TopPage() {
       <div className="mx-auto max-w-[395px] flex flex-col gap-6 px-6 pt-12 pb-12">
         {/* Logo Section */}
         <div className="flex flex-col items-center gap-3">
-          <div className="flex h-[100px] w-[100px] items-center justify-center rounded-3xl bg-primary">
-            <MapPin className="h-12 w-12 text-white" />
-          </div>
+          <Image
+            src="/icon.png"
+            alt="つぎココ"
+            width={100}
+            height={100}
+            className="h-[100px] w-[100px]"
+          />
           <h1 className="text-[32px] font-bold text-foreground text-center">
             つぎココ
           </h1>

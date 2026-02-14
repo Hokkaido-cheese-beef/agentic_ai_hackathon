@@ -48,8 +48,6 @@ function toCandidateDomain(tripGroupId: string, candidateId: string, data: Recor
     name: (data.name as string) ?? "",
     description: (data.description as string | null) ?? null,
     image_url: (data.image_url as string | null) ?? null,
-    rating: (data.rating as number | null) ?? null,
-    review_count: (data.review_count as number | null) ?? null,
     tags: normalizeTags(data.tags),
     info: (data.info as string | null) ?? null,
     ai_summary: normalizeAiSummary(data.ai_summary),
@@ -156,8 +154,6 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
       name: data.name,
       description: null,
       image_url: null,
-      rating: null,
-      review_count: null,
       tags: [],
       info: null,
       ai_summary: null,
@@ -203,11 +199,10 @@ export class FirestoreCandidateRepository implements ICandidateRepository {
   async update(candidateId: string, tripGroupId: string, data: Partial<CandidateUpdateData>): Promise<TripCandidate> {
     const updateData: Record<string, unknown> = {};
     if (data.description !== undefined) updateData.description = data.description;
-    if (data.rating !== undefined) updateData.rating = data.rating;
-    if (data.review_count !== undefined) updateData.review_count = data.review_count;
     if (data.tags !== undefined) updateData.tags = data.tags;
     if (data.info !== undefined) updateData.info = data.info;
     if (data.ai_summary !== undefined) updateData.ai_summary = data.ai_summary;
+    if (data.image_url !== undefined) updateData.image_url = data.image_url;
     updateData.updated_at = FieldValue.serverTimestamp();
 
     const docRef = adminDb

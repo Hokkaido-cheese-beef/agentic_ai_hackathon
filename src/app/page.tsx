@@ -282,6 +282,14 @@ export default function TopPage() {
             />
           </div>
         </div>
+
+        {/* Disclaimer */}
+        <div className="rounded-xl border border-border bg-white/60 px-4 py-3 mt-2">
+          <p className="text-[11px] font-medium text-text-secondary mb-1">ご利用上の注意</p>
+          <p className="text-[11px] text-text-secondary leading-[1.7]">
+            本サービスで出力されるテキストはAIによって生成されたものであり、内容の正確性や完全性を保証するものではありません。なお、本サービスの利用に起因して生じた損害について、運営者は一切の責任を負いかねます。
+          </p>
+        </div>
       </div>
     </main>
   );
